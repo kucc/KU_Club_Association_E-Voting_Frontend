@@ -1,0 +1,16 @@
+node_modules
+coverage
+
+.next
+dist
+out
+build
+
+next-env.d.ts
+
+pnpm-lock.yaml
+pnpm-workspace.yaml
+
+.env
+.env.local
+.env.*
