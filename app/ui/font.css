@@ -1,5 +1,5 @@
 @theme inline {
-  --font-sans: var(--font-geist-sans);
+  --font-sans: 'Pretendard Variable', 'Pretendard', var(--font-geist-sans);
   --font-serif: var(--font-noto-serif-kr);
   --font-mono: var(--font-geist-mono);
   --font-roboto: var(--font-roboto);

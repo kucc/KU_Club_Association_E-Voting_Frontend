@@ -1,14 +1,6 @@
-// TODO: 디자인 확정 후 글자 크기 변경
 import { HTMLAttributes } from 'react';
 
-type TextColor =
-  | 'high'
-  | 'medium'
-  | 'low'
-  | 'gold'
-  | 'black'
-  | 'primary'
-  | 'primary-accent';
+type TextColor = 'high' | 'medium' | 'low' | 'black' | 'white';
 
 export type TypoProps = Readonly<{
   children: React.ReactNode;
@@ -22,25 +14,19 @@ function Base({ children, as: Tag, color, bold, className }: TypoProps) {
   let colorClass = '';
   switch (color) {
     case 'high':
-      colorClass = 'text-arcana-text-high';
+      colorClass = 'text-voting-text-high';
       break;
     case 'medium':
-      colorClass = 'text-arcana-text-medium';
+      colorClass = 'text-voting-text-medium';
       break;
     case 'low':
-      colorClass = 'text-arcana-text-low';
-      break;
-    case 'gold':
-      colorClass = 'text-arcana-gold';
+      colorClass = 'text-voting-text-low';
       break;
     case 'black':
-      colorClass = 'text-arcana-text-black';
+      colorClass = 'text-voting-text-black';
       break;
-    case 'primary':
-      colorClass = 'text-arcana-primary';
-      break;
-    case 'primary-accent':
-      colorClass = 'text-arcana-primary-accent';
+    case 'white':
+      colorClass = 'text-voting-text-white';
       break;
     default:
       colorClass = 'text-inherit';
@@ -54,6 +40,8 @@ function Base({ children, as: Tag, color, bold, className }: TypoProps) {
       className={_className}
       style={{
         fontWeight: bold ? 'bold' : 'normal',
+        lineHeight: '100%',
+        letterSpacing: 0,
       }}
     >
       {children}
@@ -61,8 +49,8 @@ function Base({ children, as: Tag, color, bold, className }: TypoProps) {
   );
 }
 
-const T200 = (props: TypoProps) => {
-  const className = `text-[20px] ${props.className || ''}`;
+const T400 = (props: TypoProps) => {
+  const className = `text-[40px] ${props.className || ''}`;
 
   return (
     <Base
@@ -72,8 +60,19 @@ const T200 = (props: TypoProps) => {
   );
 };
 
-const T180 = (props: TypoProps) => {
-  const className = `text-[18px] ${props.className || ''}`;
+const T240 = (props: TypoProps) => {
+  const className = `text-[24px] ${props.className || ''}`;
+
+  return (
+    <Base
+      {...props}
+      className={className}
+    />
+  );
+};
+
+const T200 = (props: TypoProps) => {
+  const className = `text-[20px] ${props.className || ''}`;
 
   return (
     <Base
@@ -116,22 +115,11 @@ const T120 = (props: TypoProps) => {
   );
 };
 
-const T100 = (props: TypoProps) => {
-  const className = `text-[10px] ${props.className || ''}`;
-
-  return (
-    <Base
-      {...props}
-      className={className}
-    />
-  );
-};
-
 export const Typography = {
+  T400,
+  T240,
   T200,
-  T180,
   T160,
   T140,
   T120,
-  T100,
 };
