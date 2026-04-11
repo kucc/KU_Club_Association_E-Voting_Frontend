@@ -22,13 +22,13 @@ export default function Home() {
           // 로그인 후: 양옆 배치 (로고, 프로필)
           <div className="mt-[62px] flex h-[44px] w-full items-center justify-between gap-[12px] px-[20px]">
             <Image
-              src="/images/logo_poll.svg"
+              src="/icons/logo_poll.svg"
               alt="logo"
               width={28}
               height={28}
             />
             <Image
-              src="/images/profile.svg"
+              src="/icons/profile.svg"
               alt="profile"
               width={28}
               height={28}
@@ -38,7 +38,7 @@ export default function Home() {
           // 로그인 전: 중앙 배치 (로고만)
           <div className="absolute top-[62px] left-1/2 -translate-x-1/2">
             <Image
-              src="/images/logo_poll.svg"
+              src="/icons/logo_poll.svg"
               alt="logo"
               width={28}
               height={28}
