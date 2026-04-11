@@ -1,14 +1,8 @@
-// TODO: 디자인 확정 후 폰트 변경 + font.css 수정
-import { Geist, Geist_Mono, Noto_Serif_KR, Roboto } from 'next/font/google';
+import { Noto_Serif_KR, Roboto } from 'next/font/google';
+import localfont from 'next/font/local';
 
-export const geistSans = Geist({
-  variable: '--font-geist-sans',
-  subsets: ['latin'],
-});
-
-export const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
-  subsets: ['latin'],
+export const Pretendard = localfont({
+  src: '../../public/fonts/PretendardVariable.woff2',
 });
 
 export const roboto = Roboto({

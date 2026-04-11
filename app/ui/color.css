@@ -4,7 +4,39 @@
 /* 예시: kucheck-primary */
 
 @theme inline {
+  --color-voting-mint: var(--voting-mint);
+  --color-voting-mint-high: var(--voting-mint-high);
+
+  --color-voting-black: var(--voting-black);
+  --color-voting-background: var(--voting-background);
+  --color-voting-gray: var(--voting-gray);
+
+  --color-voting-disabled: var(--voting-disabled);
+
+  --color-voting-text-high: var(--voting-text-high);
+  --color-voting-text-medium: var(--voting-text-medium);
+  --color-voting-text-low: var(--voting-text-low);
+
+  --color-voting-text-black: var(--voting-text-black);
+  --color-voting-text-white: var(--voting-text-white);
 }
 
 :root {
+  --voting-mint: #d5ead9;
+  --voting-mint-high: #eef8f0;
+
+  --voting-black: #000000;
+  --voting-background: #f3f5f7;
+  --voting-gray: #e4e6e9;
+
+  /* 사용이 제한된 버튼 등에 사용 */
+  --voting-disabled: #d9d9d9;
+
+  /* 텍스트 색깔 */
+  --voting-text-high: #e4e6e9;
+  --voting-text-medium: #72757a;
+  --voting-text-low: #434547;
+
+  --voting-text-black: #000000;
+  --voting-text-white: #ffffff;
 }
