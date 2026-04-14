@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 
 import { Sans } from '../ui/sans';
+import { ThemePreview } from './theme-preview';
 
 // 배포 환경에서 접근 제한
 if (process.env.NODE_ENV === 'production') {
@@ -123,6 +124,10 @@ export default function Page() {
           <div className="flex h-30 w-30 items-center justify-center bg-voting-disabled"></div>
         </div>
       </div>
+
+      <hr className="my-8" />
+
+      <ThemePreview />
     </div>
   );
 }

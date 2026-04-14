@@ -4,6 +4,7 @@
 /* 예시: kucheck-primary */
 
 @theme inline {
+  /* TODO: 색깔 삭제 시작 */
   --color-voting-mint: var(--voting-mint);
   --color-voting-mint-high: var(--voting-mint-high);
 
@@ -19,9 +20,73 @@
 
   --color-voting-text-black: var(--voting-text-black);
   --color-voting-text-white: var(--voting-text-white);
+  /* TODO: 색깔 삭제 끝 */
+
+  /* Background */
+  --color-background: var(--color-background);
+  --color-background-popup: var(--color-background-popup);
+  --color-hero-card: var(--color-hero-card);
+  --color-background-section: var(--color-background-section);
+  --color-background-search: var(--color-background-search);
+  --color-profile: var(--color-profile);
+  --color-background-profile-section: var(--color-background-profile-section);
+  --color-badge: var(--color-badge);
+
+  /* Label */
+  --color-label: var(--color-label);
+  --color-label-click: var(--color-label-click);
+  --color-label-unavailable: var(--color-label-unavailable);
+  --color-label-success: var(--color-label-success);
+  --color-label-home: var(--color-label-home);
+  --color-label-select: var(--color-label-select);
+  --color-label-not-select: var(--color-label-not-select);
+
+  /* Chip */
+  --color-chip-on: var(--color-chip-on);
+  --color-chip-off: var(--color-chip-off);
+
+  /* Text */
+  --color-text-hero: var(--color-text-hero);
+  --color-text-popup: var(--color-text-popup);
+  --color-text-badge: var(--color-text-badge);
+
+  /* Text / Heading */
+  --color-text-heading-page: var(--color-text-heading-page);
+  --color-text-heading-page-light: var(--color-text-heading-page-light);
+  --color-text-heading-section: var(--color-text-heading-section);
+
+  /* Text / Label */
+  --color-text-label: var(--color-text-label);
+  --color-text-label-click: var(--color-text-label-click);
+  --color-text-label-unavailable: var(--color-text-label-unavailable);
+  --color-text-label-success: var(--color-text-label-success);
+  --color-text-label-home: var(--color-text-label-home);
+  --color-text-label-select: var(--color-text-label-select);
+  --color-text-label-not-select: var(--color-text-label-not-select);
+
+  /* Text / Chip */
+  --color-text-chip-on: var(--color-text-chip-on);
+  --color-text-chip-off: var(--color-text-chip-off);
+
+  /* Text / Input */
+  --color-text-input-placeholder: var(--color-text-input-placeholder);
+  --color-text-input-value: var(--color-text-input-value);
+
+  /* Text / Title */
+  --color-text-title-card: var(--color-text-title-card);
+  --color-text-title-value: var(--color-text-title-value);
+  --color-text-title-subvalue: var(--color-text-title-subvalue);
+  --color-text-title-label: var(--color-text-title-label);
+
+  /* Text / Profile */
+  --color-text-profile-name: var(--color-text-profile-name);
+  --color-text-profile-support: var(--color-text-profile-support);
+  --color-text-profile-value: var(--color-text-profile-value);
+  --color-text-profile-label: var(--color-text-profile-label);
 }
 
 :root {
+  /* TODO: 색깔 삭제 시작 */
   --voting-mint: #d5ead9;
   --voting-mint-high: #eef8f0;
 
@@ -39,4 +104,220 @@
 
   --voting-text-black: #000000;
   --voting-text-white: #ffffff;
+  /* TODO: 색깔 삭제 끝 */
+
+  /* Gray scale */
+  --voting-text-black: #1e1d1c;
+  --voting-gray-900: #303030;
+  --voting-gray-700: #52514e;
+  --voting-gray-500: #848485;
+  --voting-gray-300: #a9abad;
+  --voting-gray-100: #c1c5c7;
+  --voting-gray-50: #d2d8db;
+  --voting-gray-30: #e3e8eb;
+  --voting-gray-bg: #f2f5f6;
+  --voting-white: #ffffff;
+
+  /* Crimson */
+  --voting-crimson-main: #a0191e;
+  --voting-crimson-900: #b61f25;
+  --voting-crimson-700: #d14045;
+  --voting-crimson-500: #ed6c6c;
+  --voting-crimson-300: #f8a1a4;
+  --voting-crimson-100: #fbb9bc;
+  --voting-crimson-70: #ffcdcf;
+  --voting-crimson-50: #ffdcde;
+  --voting-crimson-30: #ffeced;
+}
+
+.theme-default {
+  /* Background */
+  --color-background: var(--voting-gray-bg);
+  --color-background-popup: var(--voting-white);
+  --color-hero-card: var(--voting-crimson-main);
+  --color-background-section: var(--voting-white);
+  --color-background-search: var(--voting-white);
+  --color-profile: var(--voting-crimson-main);
+  --color-background-profile-section: var(--voting-crimson-700);
+  --color-badge: var(--voting-crimson-main);
+
+  /* Label */
+  --color-label: var(--voting-crimson-main);
+  --color-label-click: var(--voting-crimson-300);
+  --color-label-unavailable: var(--voting-gray-100);
+  --color-label-success: var(--voting-gray-500);
+  --color-label-home: var(--voting-crimson-300);
+  --color-label-select: var(--voting-white);
+  --color-label-not-select: var(--voting-white);
+
+  /* Chip */
+  --color-chip-on: var(--voting-crimson-main);
+  --color-chip-off: var(--voting-gray-30);
+
+  /* Text */
+  --color-text-hero: var(--voting-crimson-50);
+  --color-text-popup: var(--voting-text-black);
+  --color-text-badge: var(--voting-white);
+
+  /* Text / Heading */
+  --color-text-heading-page: var(--voting-text-black);
+  --color-text-heading-page-light: var(--voting-white);
+  --color-text-heading-section: var(--voting-text-black);
+
+  /* Text / Label */
+  --color-text-label: var(--voting-white);
+  --color-text-label-click: var(--voting-white);
+  --color-text-label-unavailable: var(--voting-white);
+  --color-text-label-success: var(--voting-white);
+  --color-text-label-home: var(--voting-crimson-main);
+  --color-text-label-select: var(--voting-crimson-main);
+  --color-text-label-not-select: var(--voting-gray-300);
+
+  /* Text / Chip */
+  --color-text-chip-on: var(--voting-white);
+  --color-text-chip-off: var(--voting-gray-500);
+
+  /* Text / Input */
+  --color-text-input-placeholder: var(--voting-gray-500);
+  --color-text-input-value: var(--voting-text-black);
+
+  /* Text / Title */
+  --color-text-title-card: var(--voting-text-black);
+  --color-text-title-value: var(--voting-gray-700);
+  --color-text-title-subvalue: var(--voting-gray-300);
+  --color-text-title-label: var(--voting-gray-500);
+
+  /* Text / Profile */
+  --color-text-profile-name: var(--voting-white);
+  --color-text-profile-support: var(--voting-crimson-100);
+  --color-text-profile-value: var(--voting-crimson-30);
+  --color-text-profile-label: var(--voting-crimson-300);
+}
+
+.theme-agent {
+  /* Background */
+  --color-background: var(--voting-gray-bg);
+  --color-background-popup: var(--voting-white);
+  --color-hero-card: var(--voting-crimson-main);
+  --color-background-section: var(--voting-white);
+  --color-background-search: var(--voting-white);
+  --color-profile: var(--voting-crimson-300);
+  --color-background-profile-section: var(--voting-crimson-100);
+  --color-badge: var(--voting-crimson-main);
+
+  /* Label */
+  --color-label: var(--voting-crimson-main);
+  --color-label-click: var(--voting-crimson-300);
+  --color-label-unavailable: var(--voting-gray-100);
+  --color-label-success: var(--voting-gray-500);
+  --color-label-home: var(--voting-crimson-300);
+  --color-label-select: var(--voting-white);
+  --color-label-not-select: var(--voting-white);
+
+  /* Chip */
+  --color-chip-on: var(--voting-crimson-main);
+  --color-chip-off: var(--voting-gray-30);
+
+  /* Text */
+  --color-text-hero: var(--voting-crimson-50);
+  --color-text-popup: var(--voting-text-black);
+  --color-text-badge: var(--voting-white);
+
+  /* Text / Heading */
+  --color-text-heading-page: var(--voting-text-black);
+  --color-text-heading-page-light: var(--voting-white);
+  --color-text-heading-section: var(--voting-text-black);
+
+  /* Text / Label */
+  --color-text-label: var(--voting-white);
+  --color-text-label-click: var(--voting-white);
+  --color-text-label-unavailable: var(--voting-white);
+  --color-text-label-success: var(--voting-white);
+  --color-text-label-home: var(--voting-crimson-main);
+  --color-text-label-select: var(--voting-crimson-main);
+  --color-text-label-not-select: var(--voting-gray-300);
+
+  /* Text / Chip */
+  --color-text-chip-on: var(--voting-white);
+  --color-text-chip-off: var(--voting-gray-500);
+
+  /* Text / Input */
+  --color-text-input-placeholder: var(--voting-gray-500);
+  --color-text-input-value: var(--voting-text-black);
+
+  /* Text / Title */
+  --color-text-title-card: var(--voting-text-black);
+  --color-text-title-value: var(--voting-gray-700);
+  --color-text-title-subvalue: var(--voting-gray-300);
+  --color-text-title-label: var(--voting-gray-500);
+
+  /* Text / Profile */
+  --color-text-profile-name: var(--voting-text-black);
+  --color-text-profile-support: var(--voting-gray-700);
+  --color-text-profile-value: var(--voting-gray-700);
+  --color-text-profile-label: var(--voting-gray-500);
+}
+
+.theme-executive {
+  /* Background */
+  --color-background: var(--voting-gray-900);
+  --color-background-popup: var(--voting-gray-900);
+  --color-hero-card: var(--voting-crimson-50);
+  --color-background-section: var(--voting-gray-700);
+  --color-background-search: var(--voting-gray-700);
+  --color-profile: var(--voting-text-black);
+  --color-background-profile-section: var(--voting-gray-900);
+  --color-badge: var(--voting-crimson-main);
+
+  /* Label */
+  --color-label: var(--voting-crimson-main);
+  --color-label-click: var(--voting-crimson-500);
+  --color-label-unavailable: var(--voting-gray-500);
+  --color-label-success: var(--voting-gray-300);
+  --color-label-home: var(--voting-crimson-main);
+  --color-label-select: var(--voting-gray-700);
+  --color-label-not-select: var(--voting-gray-700);
+
+  /* Chip */
+  --color-chip-on: var(--voting-crimson-main);
+  --color-chip-off: var(--voting-gray-700);
+
+  /* Text */
+  --color-text-hero: var(--voting-crimson-main);
+  --color-text-popup: var(--voting-white);
+  --color-text-badge: var(--voting-white);
+
+  /* Text / Heading */
+  --color-text-heading-page: var(--voting-white);
+  --color-text-heading-page-light: var(--voting-text-black);
+  --color-text-heading-section: var(--voting-white);
+
+  /* Text / Label */
+  --color-text-label: var(--voting-white);
+  --color-text-label-click: var(--voting-white);
+  --color-text-label-unavailable: var(--voting-gray-100);
+  --color-text-label-success: var(--voting-gray-700);
+  --color-text-label-home: var(--voting-white);
+  --color-text-label-select: var(--voting-crimson-300);
+  --color-text-label-not-select: var(--voting-gray-300);
+
+  /* Text / Chip */
+  --color-text-chip-on: var(--voting-white);
+  --color-text-chip-off: var(--voting-gray-100);
+
+  /* Text / Input */
+  --color-text-input-placeholder: var(--voting-gray-500);
+  --color-text-input-value: var(--voting-white);
+
+  /* Text / Title */
+  --color-text-title-card: var(--voting-white);
+  --color-text-title-value: var(--voting-gray-50);
+  --color-text-title-subvalue: var(--voting-gray-500);
+  --color-text-title-label: var(--voting-gray-300);
+
+  /* Text / Profile */
+  --color-text-profile-name: var(--voting-white);
+  --color-text-profile-support: var(--voting-gray-300);
+  --color-text-profile-value: var(--voting-gray-30);
+  --color-text-profile-label: var(--voting-gray-100);
 }
