@@ -27,9 +27,9 @@ export default function RootLayout({
       lang="en"
       className={`${Pretendard.className} ${notoSerifKR.variable} ${roboto.variable} h-full antialiased`}
     >
-      <ThemeProvider>
-        <body className="flex min-h-full flex-col">{children}</body>
-      </ThemeProvider>
+      <body className="flex min-h-full flex-col">
+        <ThemeProvider>{children}</ThemeProvider>
+      </body>
     </html>
   );
 }
