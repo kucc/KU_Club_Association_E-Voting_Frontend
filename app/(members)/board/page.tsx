@@ -52,7 +52,7 @@ export default function Home() {
             />
             <Sans.T200
               as="h2"
-              color="black"
+              color="heading-page"
             >
               <span className="leading-[140%] font-semibold tracking-[-0.02em]">
                 내 투표
@@ -66,8 +66,8 @@ export default function Home() {
             <div className="flex flex-grow flex-col gap-[4px]">
               <Sans.T240
                 as="h1"
-                bold
-                color="black"
+                weight="bold"
+                color="heading-page"
                 className="leading-[29px]"
               >
                 {user.name}
@@ -75,21 +75,21 @@ export default function Home() {
               <div className="flex items-center gap-[4px]">
                 <Sans.T160
                   as="span"
-                  color="low"
+                  color="title-subvalue"
                   className="font-medium"
                 >
                   {user.club}
                 </Sans.T160>
                 <Sans.T160
                   as="span"
-                  color="low"
+                  color="title-subvalue"
                   className="font-medium"
                 >
                   ·
                 </Sans.T160>
                 <Sans.T160
                   as="span"
-                  color="low"
+                  color="title-subvalue"
                   className="font-medium"
                 >
                   {user.position}
@@ -124,7 +124,7 @@ export default function Home() {
           <div className="flex h-[40px] items-center">
             <Sans.T240
               as="h2"
-              color="black"
+              color="heading-page"
             >
               <span className="leading-[140%] font-semibold tracking-[-0.02em]">
                 지금 진행 중인 투표
@@ -138,8 +138,8 @@ export default function Home() {
             >
               <Sans.T200
                 as="h3"
-                bold
-                color="black"
+                weight="bold"
+                color="heading-page"
               >
                 {vote.title}
               </Sans.T200>
@@ -172,7 +172,7 @@ export default function Home() {
           <div className="flex h-[40px] items-center justify-between">
             <Sans.T240
               as="h2"
-              color="black"
+              color="heading-page"
             >
               <span className="font-semibold tracking-[-0.02em]">
                 완료된 투표
@@ -219,14 +219,14 @@ function InfoRow({ label, value }: { label: string; value: string }) {
     <div className="flex h-[17px] items-center gap-[16px]">
       <Sans.T140
         as="span"
-        color="medium"
+        color="input-placeholder"
         className="w-[55px] leading-[17px]"
       >
         <span className="font-medium">{label}</span>
       </Sans.T140>
       <Sans.T140
         as="span"
-        color="low"
+        color="title-subvalue"
         className="leading-[17px]"
       >
         <span className="font-medium">{value}</span>
@@ -248,7 +248,7 @@ function VoteRow({
     <div className="flex h-[17px] items-center gap-[16px]">
       <Sans.T140
         as="span"
-        color="medium"
+        color="input-placeholder"
         className="w-[55px] leading-[17px]"
       >
         <span className="font-medium">{label}</span>
@@ -256,7 +256,7 @@ function VoteRow({
       <div className="flex h-[17px] items-center gap-[4px]">
         <Sans.T140
           as="span"
-          color="low"
+          color="title-subvalue"
           className="leading-[17px]"
         >
           <span className="font-medium">{value}</span>
@@ -264,7 +264,7 @@ function VoteRow({
         {subValue && (
           <Sans.T140
             as="span"
-            color="medium"
+            color="input-placeholder"
             className="leading-[17px]"
           >
             <span className="font-medium">{subValue}</span>
@@ -281,8 +281,8 @@ function VoteCard({ vote }: { vote: Poll }) {
       <div className="flex h-[24px] items-center justify-between">
         <Sans.T200
           as="h3"
-          bold
-          color="black"
+          weight="bold"
+          color="heading-page"
         >
           {vote.title}
         </Sans.T200>
@@ -290,7 +290,7 @@ function VoteCard({ vote }: { vote: Poll }) {
           <div className="flex h-[21px] items-center justify-center rounded-[4px] bg-black px-[6px] py-[2px]">
             <Sans.T120
               as="span"
-              color="white"
+              color="heading-page-light"
             >
               <span className="font-medium">대리인</span>
             </Sans.T120>

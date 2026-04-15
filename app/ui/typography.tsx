@@ -1,47 +1,85 @@
 import { HTMLAttributes } from 'react';
 
-type TextColor = 'high' | 'medium' | 'low' | 'black' | 'white';
+type TextColor =
+  | 'hero'
+  | 'popup'
+  | 'badge'
+  // heading
+  | 'heading-page'
+  | 'heading-page-light'
+  | 'heading-section'
+  // label
+  | 'label'
+  | 'label-click'
+  | 'label-unavailable'
+  | 'label-success'
+  | 'label-home'
+  | 'label-select'
+  | 'label-not-select'
+  // chip
+  | 'chip-on'
+  | 'chip-off'
+  // input
+  | 'input-placeholder'
+  | 'input-value'
+  // title
+  | 'title-card'
+  | 'title-value'
+  | 'title-subvalue'
+  | 'title-label'
+  // profile
+  | 'profile-name'
+  | 'profile-support'
+  | 'profile-value'
+  | 'profile-label';
+
+type TextWeight = 'medium' | 'semi-bold' | 'bold';
 
 export type TypoProps = Readonly<{
   children: React.ReactNode;
   as: 'h1' | 'h2' | 'h3' | 'p' | 'span';
   className?: HTMLAttributes<HTMLParagraphElement>['className'];
   color?: TextColor;
-  bold?: boolean;
+  weight?: TextWeight;
+  lineHeight?: string;
+  letterSpacing?: string;
 }>;
 
-function Base({ children, as: Tag, color, bold, className }: TypoProps) {
-  let colorClass = '';
-  switch (color) {
-    case 'high':
-      colorClass = 'text-voting-text-high';
-      break;
+function Base({
+  children,
+  as: Tag,
+  className,
+  color,
+  weight = 'medium',
+  lineHeight = '100%',
+  letterSpacing = '0',
+}: TypoProps) {
+  const colorClass = color ? `text-text-${color}` : 'text-inherit';
+
+  let weightClass = '';
+  switch (weight) {
     case 'medium':
-      colorClass = 'text-voting-text-medium';
+      weightClass = 'font-medium';
       break;
-    case 'low':
-      colorClass = 'text-voting-text-low';
+    case 'semi-bold':
+      weightClass = 'font-semibold';
       break;
-    case 'black':
-      colorClass = 'text-voting-text-black';
-      break;
-    case 'white':
-      colorClass = 'text-voting-text-white';
+    case 'bold':
+      weightClass = 'font-bold';
       break;
     default:
-      colorClass = 'text-inherit';
+      weightClass = 'font-normal';
       break;
   }
 
-  const _className = `${colorClass || ''} ${className || ''} whitespace-pre-wrap`;
+  const _className = `${colorClass} ${weightClass} ${className || ''} whitespace-pre-wrap`;
 
   return (
     <Tag
       className={_className}
       style={{
-        fontWeight: bold ? 'bold' : 'normal',
-        lineHeight: '100%',
-        letterSpacing: 0,
+        lineHeight: lineHeight,
+        letterSpacing: letterSpacing,
       }}
     >
       {children}

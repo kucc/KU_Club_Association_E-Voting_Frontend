@@ -52,8 +52,8 @@ export default function Home() {
         >
           <Sans.T400
             as="h1"
-            bold
-            color="black"
+            weight="bold"
+            color="heading-page"
           >
             <span className="block leading-[48px] tracking-[-0.04em]">
               {'고려대학교\n동아리연합회\n온라인투표시스템'}
@@ -65,14 +65,14 @@ export default function Home() {
             <div>
               <Sans.T200
                 as="span"
-                bold
-                color="black"
+                weight="bold"
+                color="heading-page"
               >
                 오승민
               </Sans.T200>
               <Sans.T200
                 as="span"
-                color="black"
+                color="heading-page"
               >
                 님 환영합니다
               </Sans.T200>
@@ -80,7 +80,7 @@ export default function Home() {
           ) : (
             <Sans.T200
               as="p"
-              color="black"
+              color="heading-page"
             >
               어떤 문구가 좋을까요
             </Sans.T200>
@@ -104,7 +104,7 @@ export default function Home() {
           <section className="flex flex-col gap-[16px]">
             <Sans.T240
               as="h2"
-              color="black"
+              color="heading-page"
             >
               <span className="font-semibold tracking-[-0.02em]">
                 지금 진행 중인 투표
@@ -113,8 +113,8 @@ export default function Home() {
             <div className="flex flex-col gap-[20px] rounded-[16px] bg-white p-[24px] shadow-sm">
               <Sans.T200
                 as="h3"
-                bold
-                color="black"
+                weight="bold"
+                color="heading-page"
               >
                 제1회 동아리연합회장 선거
               </Sans.T200>
@@ -122,14 +122,14 @@ export default function Home() {
                 <div className="flex gap-[16px]">
                   <Sans.T140
                     as="span"
-                    color="medium"
+                    color="input-placeholder"
                     className="w-[55px]"
                   >
                     기간
                   </Sans.T140>
                   <Sans.T140
                     as="span"
-                    color="low"
+                    color="title-subvalue"
                   >
                     26.04.07 16:00에 종료
                   </Sans.T140>
@@ -137,14 +137,14 @@ export default function Home() {
                 <div className="flex gap-[16px]">
                   <Sans.T140
                     as="span"
-                    color="medium"
+                    color="input-placeholder"
                     className="w-[55px]"
                   >
                     투표 현황
                   </Sans.T140>
                   <Sans.T140
                     as="span"
-                    color="low"
+                    color="title-subvalue"
                   >
                     투표하고 확인
                   </Sans.T140>
@@ -160,7 +160,7 @@ export default function Home() {
           <section className="flex flex-col gap-[16px]">
             <Sans.T240
               as="h2"
-              color="black"
+              color="heading-page"
             >
               <span className="font-semibold tracking-[-0.02em]">
                 예정된 투표
@@ -169,8 +169,8 @@ export default function Home() {
             <div className="flex flex-col gap-[20px] rounded-[16px] bg-white p-[24px] shadow-sm">
               <Sans.T200
                 as="h3"
-                bold
-                color="black"
+                weight="bold"
+                color="heading-page"
               >
                 제1회 동아리연합회장 선거
               </Sans.T200>
@@ -178,14 +178,14 @@ export default function Home() {
                 <div className="flex gap-[16px]">
                   <Sans.T140
                     as="span"
-                    color="medium"
+                    color="input-placeholder"
                     className="w-[55px] whitespace-nowrap"
                   >
                     기간
                   </Sans.T140>
                   <Sans.T140
                     as="span"
-                    color="low"
+                    color="title-subvalue"
                   >
                     26.04.07 16:00에 시작
                   </Sans.T140>
@@ -201,8 +201,8 @@ export default function Home() {
             <div className="flex flex-col gap-[20px] rounded-[16px] bg-white p-[24px] shadow-sm">
               <Sans.T200
                 as="h3"
-                bold
-                color="black"
+                weight="bold"
+                color="heading-page"
               >
                 제1회 동아리연합회장 선거
               </Sans.T200>
@@ -210,14 +210,14 @@ export default function Home() {
                 <div className="flex gap-[16px]">
                   <Sans.T140
                     as="span"
-                    color="medium"
+                    color="input-placeholder"
                     className="w-[55px] whitespace-nowrap"
                   >
                     기간
                   </Sans.T140>
                   <Sans.T140
                     as="span"
-                    color="low"
+                    color="title-subvalue"
                   >
                     26.04.07 16:00에 시작
                   </Sans.T140>
@@ -233,8 +233,8 @@ export default function Home() {
             <div className="flex flex-col gap-[20px] rounded-[16px] bg-white p-[24px] shadow-sm">
               <Sans.T200
                 as="h3"
-                bold
-                color="black"
+                weight="bold"
+                color="heading-page"
               >
                 제1회 동아리연합회장 선거
               </Sans.T200>
@@ -242,14 +242,14 @@ export default function Home() {
                 <div className="flex gap-[16px]">
                   <Sans.T140
                     as="span"
-                    color="medium"
+                    color="input-placeholder"
                     className="w-[55px] whitespace-nowrap"
                   >
                     기간
                   </Sans.T140>
                   <Sans.T140
                     as="span"
-                    color="low"
+                    color="title-subvalue"
                   >
                     26.04.07 16:00에 시작
                   </Sans.T140>

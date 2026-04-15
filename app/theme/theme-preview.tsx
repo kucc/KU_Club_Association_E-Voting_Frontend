@@ -21,7 +21,7 @@ function Section({
     <div className="mt-6">
       <Sans.T160
         as="p"
-        bold
+        weight="bold"
         className="mb-3"
       >
         {title}
@@ -249,7 +249,7 @@ function PreviewContent() {
     <div className="p-6">
       <Sans.T240
         as="h2"
-        bold
+        weight="bold"
         className="mb-4"
       >
         테마 미리보기
