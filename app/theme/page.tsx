@@ -13,7 +13,7 @@ export default function Page() {
     <div>
       <Sans.T400
         as="p"
-        bold
+        weight="bold"
       >
         Pretendard 40px bold 다람쥐 헌 쳇바퀴에 타고파
       </Sans.T400>
@@ -23,7 +23,7 @@ export default function Page() {
 
       <Sans.T240
         as="p"
-        bold
+        weight="bold"
       >
         Pretendard 24px bold 다람쥐 헌 쳇바퀴에 타고파
       </Sans.T240>
@@ -33,7 +33,7 @@ export default function Page() {
 
       <Sans.T200
         as="p"
-        bold
+        weight="bold"
       >
         Pretendard 20px bold 다람쥐 헌 쳇바퀴에 타고파
       </Sans.T200>
@@ -43,7 +43,7 @@ export default function Page() {
 
       <Sans.T160
         as="p"
-        bold
+        weight="bold"
       >
         Pretendard 16px bold 다람쥐 헌 쳇바퀴에 타고파
       </Sans.T160>
@@ -53,7 +53,7 @@ export default function Page() {
 
       <Sans.T140
         as="p"
-        bold
+        weight="bold"
       >
         Pretendard 14px bold 다람쥐 헌 쳇바퀴에 타고파
       </Sans.T140>
@@ -64,33 +64,33 @@ export default function Page() {
       <div className="bg-voting-mint">
         <Sans.T240
           as="p"
-          color="white"
+          color="heading-page-light"
           className="bg-voting-black"
         >
           text-white
         </Sans.T240>
         <Sans.T240
           as="p"
-          color="high"
+          color="chip-off"
           className="bg-voting-black"
         >
           text-high
         </Sans.T240>
         <Sans.T240
           as="p"
-          color="medium"
+          color="input-placeholder"
         >
           text-medium
         </Sans.T240>
         <Sans.T240
           as="p"
-          color="low"
+          color="title-subvalue"
         >
           text-low
         </Sans.T240>
         <Sans.T240
           as="p"
-          color="black"
+          color="heading-page"
         >
           text-black
         </Sans.T240>
