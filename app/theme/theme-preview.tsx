@@ -66,7 +66,7 @@ const THEMES: { value: Theme; label: string }[] = [
   { value: 'theme-executive', label: '임원진' },
 ];
 
-function ThemeSwitcher() {
+export function ThemeSwitcher() {
   const { theme, setTheme } = useTheme();
 
   return (

@@ -10,6 +10,7 @@ export default function Title({ content }: Props) {
       as="h3"
       weight="bold"
       lineHeight="24px"
+      color="title-card"
     >
       {content}
     </Sans.T200>
