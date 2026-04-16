@@ -2,6 +2,7 @@ import { Sans } from '@/app/ui/sans';
 
 import HistoryCard from '@/components/common/history-card';
 import PollCard from '@/components/common/poll-card';
+import ScheduledCard from '@/components/common/scheduled-card';
 
 import { ThemeSwitcher } from '../theme-preview';
 
@@ -22,7 +23,7 @@ export default function Page() {
           as="h2"
           color="title-card"
         >
-          Poll Cards
+          지금 진행 중인 투표
         </Sans.T240>
       </div>
       <div className="mt-2 flex flex-col gap-4">
@@ -60,7 +61,7 @@ export default function Page() {
           as="h2"
           color="title-card"
         >
-          History Cards
+          완료된 투표(투표 기록)
         </Sans.T240>
       </div>
       <div className="mt-2 flex flex-col gap-4">
@@ -84,6 +85,21 @@ export default function Page() {
           myVote="찬성"
           results="부결(45%)"
           isAgent
+        />
+      </div>
+
+      <div className="mt-8">
+        <Sans.T240
+          as="h2"
+          color="title-card"
+        >
+          예정된 투표
+        </Sans.T240>
+      </div>
+      <div className="mt-2 flex flex-col gap-4">
+        <ScheduledCard
+          title="제1회 동아리연합회장 선거"
+          openingTime="2023-12-31T23:59:59Z"
         />
       </div>
     </div>

@@ -53,7 +53,6 @@ export default function PollCard({
 
       <Button
         content={isAdmin ? '상세보기' : myVote ? '투표 수정하기' : '투표하기'}
-        disabled={!!myVote}
       />
     </Card>
   );
