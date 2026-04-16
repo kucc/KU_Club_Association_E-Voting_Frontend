@@ -1,3 +1,10 @@
+export type PollStatus = 'pending' | 'continuing' | 'completed';
+
+export interface PollStatistics {
+  quota: number;
+  votes: number;
+}
+
 export interface Poll {
   id: string;
   title: string;
