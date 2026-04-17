@@ -1,12 +1,5 @@
-import { notFound } from 'next/navigation';
-
 import { Sans } from '../ui/sans';
 import { ThemePreview } from './theme-preview';
-
-// 배포 환경에서 접근 제한
-if (process.env.NODE_ENV === 'production') {
-  notFound();
-}
 
 export default function Page() {
   return (
