@@ -1,15 +1,55 @@
-import { BASE_URL } from './api';
+import { type ApiSuccessResponse, apiClient, parseApiError } from './api';
 
-export const signIn = async (name: string, password: string) => {
-  const response = await fetch(`${BASE_URL}/auth/login`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ name, password }),
-  });
+type SignInRequest = {
+  username: string;
+  password: string;
+};
 
-  if (!response.ok) {
-    throw new Error('Failed to sign in');
+type AuthUser = {
+  id: number;
+  username: string;
+  isAdmin: boolean;
+};
+
+type AuthUserResponse = ApiSuccessResponse<{
+  user: AuthUser;
+}>;
+
+type LogoutResponse = ApiSuccessResponse<Record<string, never>>;
+
+export const signIn = async (
+  username: string,
+  password: string,
+): Promise<AuthUser> => {
+  try {
+    const { data } = await apiClient.post<AuthUserResponse>('/api/auth/login', {
+      username,
+      password,
+    } satisfies SignInRequest);
+
+    return data.user;
+  } catch (error) {
+    const apiError = parseApiError(error);
+    throw new Error(apiError.message);
+  }
+};
+
+export const signOut = async (): Promise<void> => {
+  try {
+    await apiClient.post<LogoutResponse>('/api/auth/logout');
+  } catch (error) {
+    const apiError = parseApiError(error);
+    throw new Error(apiError.message);
+  }
+};
+
+export const getCurrentUser = async (): Promise<AuthUser> => {
+  try {
+    const { data } = await apiClient.get<AuthUserResponse>('/api/auth/me');
+
+    return data.user;
+  } catch (error) {
+    const apiError = parseApiError(error);
+    throw new Error(apiError.message);
   }
 };

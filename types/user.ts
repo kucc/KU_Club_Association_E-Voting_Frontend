@@ -1,3 +1,12 @@
+// API response
+export type User = {
+  id: number;
+  username: string;
+  created_at: string;
+  is_admin: boolean;
+};
+
+// UI용
 type UserRole = 'REPRESENTATIVE' | 'AGENT';
 
 export interface UserProfile {
