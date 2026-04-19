@@ -10,7 +10,7 @@ export async function createMockUser(): Promise<UserProfile> {
 
   return {
     name: '오승민',
-    role: 'REPRESENTATIVE', // REPRESENTATIVE = 대표자 | AGENT = 대리인
+    role: 'REPRESENTATIVE', // REPRESENTATIVE = 대표자 | AGENT = 대리인 | EXECUTIVE = 전체 관리자
     club: 'KUCC',
     position: '회장',
     department: '전기전자공학부',
@@ -78,7 +78,7 @@ export async function createMockPolls(): Promise<Poll[]> {
     },
     {
       id: 'v5',
-      title: '테스트용 추가 투표 (4번째)',
+      title: '테스트용 추가 투표',
       deadline: '26.04.07 16:00',
       myVote: '찬성',
       isOngoing: false,
@@ -88,6 +88,20 @@ export async function createMockPolls(): Promise<Poll[]> {
       attendanceRate: 50,
       resultStatus: '가결',
       resultRate: 90,
+    },
+    {
+      id: 'v6',
+      title: '제2회 동아리연합회장 선거',
+      deadline: '26.11.11 16:00',
+      myVote: '', // 아직 투표 안 했으니 빈 문자열
+      isOngoing: false,
+      isMyVote: false,
+      attendanceCount: 0,
+      attendanceTotal: 100,
+      attendanceRate: 0,
+      resultStatus: '', // 결과 없음
+      resultRate: 0, // 진행 중 아님
+      currentCount: 0,
     },
   ];
 }
