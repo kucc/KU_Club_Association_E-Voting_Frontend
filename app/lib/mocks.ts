@@ -3,6 +3,10 @@
 import { Poll } from '@/types/poll';
 import { UserProfile } from '@/types/user';
 
+export interface CompletedPollItem extends Poll {
+  semester: string;
+}
+
 export async function createMockUser(): Promise<UserProfile> {
   if (process.env.NODE_ENV === 'production') {
     throw new Error('createMockUser should not be called in production');
@@ -17,6 +21,117 @@ export async function createMockUser(): Promise<UserProfile> {
     studentId: '2020170984',
     status: '재학',
   };
+}
+
+export async function createMockCompletedPolls(): Promise<CompletedPollItem[]> {
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error(
+      'createMockCompletedPolls should not be called in production',
+    );
+  }
+
+  return [
+    {
+      id: 'c1',
+      title: '2026년도 1학기 정기총회 안건 투표',
+      deadline: '2026-04-07T16:00:00',
+      myVote: '찬성',
+      isOngoing: false,
+      isMyVote: true,
+      attendanceCount: 70,
+      attendanceTotal: 72,
+      attendanceRate: 97,
+      resultStatus: '가결',
+      resultRate: 80,
+      semester: '2026-1학기',
+    },
+    {
+      id: 'c2',
+      title: '동아리 예산안 승인 투표',
+      deadline: '2026-03-20T18:00:00',
+      myVote: '찬성',
+      isOngoing: false,
+      isMyVote: true,
+      attendanceCount: 70,
+      attendanceTotal: 72,
+      attendanceRate: 97,
+      resultStatus: '부결',
+      resultRate: 35,
+      semester: '2026-1학기',
+    },
+    {
+      id: 'c3',
+      title: '회칙 개정 특별투표',
+      deadline: '2026-03-10T17:00:00',
+      myVote: '기권',
+      isOngoing: false,
+      isMyVote: true,
+      attendanceCount: 70,
+      attendanceTotal: 72,
+      attendanceRate: 97,
+      resultStatus: '가결',
+      resultRate: 76,
+      semester: '2026-1학기',
+    },
+    {
+      id: 'c4',
+      title: '임원 불신임 투표',
+      deadline: '2025-11-15T16:00:00',
+      myVote: '기권',
+      isOngoing: false,
+      isMyVote: true,
+      attendanceCount: 70,
+      attendanceTotal: 72,
+      attendanceRate: 97,
+      resultStatus: '가결',
+      resultRate: 76,
+      semester: '2025-2학기',
+    },
+    {
+      id: 'c5',
+      title: '2025년도 2학기 정기총회 안건 투표',
+      deadline: '2025-10-07T16:00:00',
+      myVote: '불참',
+      isOngoing: false,
+      isMyVote: false,
+      isAgentVote: true,
+      attendanceCount: 70,
+      attendanceTotal: 72,
+      attendanceRate: 97,
+      resultStatus: '가결',
+      resultRate: 76,
+      semester: '2025-2학기',
+    },
+    {
+      id: 'c6',
+      title: '동아리방 사용 규정 개정 투표',
+      deadline: '2025-09-20T16:00:00',
+      myVote: '불참',
+      isOngoing: false,
+      isMyVote: false,
+      isAgentVote: true,
+      attendanceCount: 70,
+      attendanceTotal: 72,
+      attendanceRate: 97,
+      resultStatus: '부결',
+      resultRate: 45,
+      semester: '2025-2학기',
+    },
+    {
+      id: 'c7',
+      title: '2023년도 1학기 행사 예산 투표',
+      deadline: '2023-05-10T17:00:00',
+      myVote: '기권',
+      isOngoing: false,
+      isMyVote: true,
+      attendanceCount: 70,
+      attendanceTotal: 72,
+      attendanceRate: 97,
+      resultStatus: '가결',
+      resultRate: 76,
+      semester: '2023-1학기',
+    },
+  ];
 }
 
 export async function createMockPolls(): Promise<Poll[]> {
