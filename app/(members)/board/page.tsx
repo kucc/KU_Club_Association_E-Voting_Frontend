@@ -25,7 +25,6 @@ export default function Home() {
     createMockPolls().then((data) => {
       const sanitizedData = data.map((v) => ({
         ...v,
-        // '26.04.07 16:00' -> '2026-04-07T16:00:00Z' 형태로 인식되게 보정
         deadline: v.deadline.includes('T')
           ? v.deadline
           : `20${v.deadline.replace(/\./g, '-').replace(' ', 'T')}:00`,
@@ -34,15 +33,14 @@ export default function Home() {
     });
   }, []);
 
-  // 유저 역할에 맞춰 테마 변경
   useEffect(() => {
     if (user) {
       if (user.role === 'EXECUTIVE') {
-        setTheme('theme-executive'); // 전체 관리자
+        setTheme('theme-executive');
       } else if (user.role === 'AGENT') {
-        setTheme('theme-agent'); // 대리인
+        setTheme('theme-agent');
       } else {
-        setTheme('theme-default'); // 대표자
+        setTheme('theme-default');
       }
     }
   }, [user, setTheme]);
@@ -69,9 +67,15 @@ export default function Home() {
   return (
     <div className="min-h-screen w-full bg-background">
       {/* --- 상단 프로필 영역 --- */}
-      <header className="relative h-[345px] w-full rounded-b-[20px] bg-profile shadow-[0_0_60px_rgba(0,0,0,0.04)]">
-        <div className="absolute top-[62px] flex h-[44px] w-full items-center gap-[12px] px-[20px]">
-          <div className="flex h-[28px] items-center gap-[16px]">
+      <header className="relative h-86.25 w-full rounded-b-[20px] bg-profile shadow-[0_0_60px_rgba(0,0,0,0.04)]">
+        {' '}
+        {/* h-[345px] -> 86.25 */}
+        <div className="absolute top-15.5 flex h-11 w-full items-center gap-3 px-5">
+          {' '}
+          {/* top-15.5(62px), h-11(44px), gap-3(12px), px-5(20px) */}
+          <div className="flex h-7 items-center gap-4">
+            {' '}
+            {/* h-7(28px), gap-4(16px) */}
             <Image
               src="/icons/back.svg"
               alt="back"
@@ -93,10 +97,15 @@ export default function Home() {
             </Sans.T200>
           </div>
         </div>
-
-        <div className="absolute top-[130px] right-[20px] left-[20px] flex flex-col gap-[16px]">
-          <div className="flex h-[52px] w-full items-center gap-[16px] px-[8px]">
-            <div className="flex flex-grow flex-col gap-[4px]">
+        <div className="absolute top-32.5 right-5 left-5 flex flex-col gap-4">
+          {' '}
+          {/* top-32.5(130px), right-5, left-5, gap-4(16px) */}
+          <div className="flex h-13 w-full items-center gap-4 px-2">
+            {' '}
+            {/* h-13(52px), gap-4(16px), px-2(8px) */}
+            <div className="flex flex-grow flex-col gap-1">
+              {' '}
+              {/* gap-1(4px) */}
               <div className="flex items-center justify-between">
                 <Sans.T240
                   as="h1"
@@ -108,7 +117,9 @@ export default function Home() {
                 </Sans.T240>
 
                 {user.role === 'AGENT' && (
-                  <div className="flex items-center justify-center rounded-[4px] bg-badge px-[6px] py-[2px]">
+                  <div className="flex items-center justify-center rounded bg-badge px-1.5 py-0.5">
+                    {' '}
+                    {/* rounded-[4px] -> rounded(4px), px-1.5(6px), py-0.5(2px) */}
                     <Sans.T120
                       as="span"
                       weight="medium"
@@ -121,7 +132,9 @@ export default function Home() {
                   </div>
                 )}
               </div>
-              <div className="flex items-center gap-[4px]">
+              <div className="flex items-center gap-1">
+                {' '}
+                {/* gap-1(4px) */}
                 <Sans.T160
                   as="span"
                   color="profile-support"
@@ -146,8 +159,9 @@ export default function Home() {
               </div>
             </div>
           </div>
-
-          <div className="flex w-full flex-col gap-[20px] rounded-[16px] bg-background-profile-section p-[24px]">
+          <div className="rounded-4 flex w-full flex-col gap-5 bg-background-profile-section p-6">
+            {' '}
+            {/* gap-5(20px), rounded-4(16px), p-6(24px) */}
             <div className="flex flex-col gap-3">
               <ProfileRow
                 label="학과"
@@ -167,10 +181,15 @@ export default function Home() {
       </header>
 
       {/* --- 하단 메인 영역 --- */}
-      <main className="flex w-full flex-col gap-[40px] px-[20px] py-[24px]">
-        {/* 지금 진행 중인 투표 */}
-        <section className="flex flex-col gap-[16px]">
-          <div className="flex h-[40px] items-center">
+      <main className="flex w-full flex-col gap-10 px-5 py-6">
+        {' '}
+        {/* gap-10(40px), px-5(20px), py-6(24px) */}
+        <section className="flex flex-col gap-4">
+          {' '}
+          {/* gap-4(16px) */}
+          <div className="flex h-10 items-center">
+            {' '}
+            {/* h-10(40px) */}
             <Sans.T240
               as="h2"
               color="heading-page"
@@ -194,10 +213,10 @@ export default function Home() {
             />
           ))}
         </section>
-
-        {/* 완료된 투표 */}
-        <section className="flex flex-col gap-[16px] pb-[40px]">
-          <div className="flex h-[40px] items-center justify-between">
+        <section className="flex flex-col gap-4 pb-10">
+          {' '}
+          {/* gap-4(16px), pb-10(40px) */}
+          <div className="flex h-10 items-center justify-between">
             <Sans.T240
               as="h2"
               color="heading-page"
@@ -216,7 +235,6 @@ export default function Home() {
               />
             </Link>
           </div>
-
           {displayedCompletedVotes.map((vote) => (
             <HistoryCard
               key={vote.id}
@@ -231,13 +249,14 @@ export default function Home() {
               isAgent={vote.isAgentVote}
             />
           ))}
-
           {completedVotes.length > 3 && (
             <Link
               href="/completed-votes"
               className="w-full"
             >
-              <div className="mt-[4px] flex flex-col">
+              <div className="mt-1 flex flex-col">
+                {' '}
+                {/* mt-1(4px) */}
                 <Button content="완료된 투표 더보기" />
               </div>
             </Link>

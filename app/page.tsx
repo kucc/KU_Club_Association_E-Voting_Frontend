@@ -19,10 +19,9 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Promise.all로 유저와 투표 데이터를 동시에 받아오고 로딩 끝내기
     Promise.all([createMockUser(), createMockPolls()]).then(
       ([userData, pollData]) => {
-        setUser(userData); // 비로그인이면 null이 들어감
+        setUser(userData);
         const sanitizedData = pollData.map((v) => ({
           ...v,
           deadline: v.deadline.includes('T')
@@ -30,15 +29,13 @@ export default function Home() {
             : `20${v.deadline.replace(/\./g, '-').replace(' ', 'T')}:00`,
         }));
         setVotes(sanitizedData);
-        setIsLoading(false); // 로딩 완료
+        setIsLoading(false);
       },
     );
   }, []);
 
-  // 초기 데이터 불러올 때 빈 화면 렌더링
   if (isLoading) return null;
 
-  // 옵셔널 체이닝(?.)을 써서 user가 null이어도 에러 안 나게
   const isManager = user?.role === 'EXECUTIVE';
   const isLogin = !!user;
 
@@ -48,18 +45,24 @@ export default function Home() {
   );
 
   return (
-    <div className="min-h-screen bg-background pb-[80px]">
+    <div className="min-h-screen bg-background pb-20">
+      {' '}
+      {/* pb-20 (80px) */}
       {/* --- 1. 상단 히어로(Hero) 섹션 --- */}
       <section
         className={`relative flex ${
-          !isLogin ? 'h-[752px]' : isManager ? 'h-[602px]' : 'h-[526px]'
+          // 💡 Canonical Classes 적용 (높이)
+          !isLogin ? 'h-188' : isManager ? 'h-150.5' : 'h-131.5'
         } w-full flex-col rounded-b-[20px] ${
+          // 💡 곡률 복구 완료!
           isManager ? 'bg-[#FFDCDE]' : 'bg-hero-card'
         } shadow-[0_0_60px_rgba(0,0,0,0.04)] transition-all duration-300`}
       >
         {/* 아이콘 영역 */}
         {isLogin ? (
-          <div className="absolute top-[62px] flex h-[44px] w-full items-center justify-between px-[20px]">
+          <div className="absolute top-15.5 flex h-11 w-full items-center justify-between px-5">
+            {' '}
+            {/* top-15.5(62px), h-11(44px) */}
             <Image
               src="/icons/logo_poll.svg"
               alt="logo"
@@ -76,7 +79,7 @@ export default function Home() {
             />
           </div>
         ) : (
-          <div className="absolute top-[62px] left-1/2 -translate-x-1/2">
+          <div className="absolute top-15.5 left-1/2 -translate-x-1/2">
             <Image
               src="/icons/logo_poll.svg"
               alt="logo"
@@ -90,8 +93,8 @@ export default function Home() {
         {/* 타이틀 및 문구 영역 */}
         <div
           className={`absolute top-1/2 -translate-y-1/2 ${
-            isLogin && !isManager ? 'mt-[58px]' : ''
-          } flex w-full flex-col items-start justify-center gap-[10px] px-[20px] py-[10px]`}
+            isLogin && !isManager ? 'mt-14.5' : '' // mt-14.5(58px)
+          } flex w-full flex-col items-start justify-center gap-2.5 px-5 py-2.5`} // gap, px, py 2.5(10px)
         >
           <Sans.T400
             as="h1"
@@ -104,7 +107,7 @@ export default function Home() {
           </Sans.T400>
 
           {isLogin ? (
-            <div className="flex flex-row items-center gap-[4px]">
+            <div className="flex flex-row items-center gap-1">
               <Sans.T200
                 as="span"
                 weight="bold"
@@ -131,14 +134,16 @@ export default function Home() {
           )}
         </div>
 
-        {/* 관리자 바로가기 버튼 노출 */}
+        {/* 관리자 바로가기 버튼 */}
         {isManager && (
-          <div className="absolute bottom-[24px] w-full px-[20px]">
+          <div className="absolute bottom-6 w-full px-5">
+            {' '}
+            {/* bottom-6(24px) */}
             <Link
               href="/admin"
               className="w-full"
             >
-              <button className="flex h-[52px] w-full items-center justify-center rounded-[10px] bg-[#A0191E] transition-transform active:scale-[0.98]">
+              <button className="flex h-13 w-full items-center justify-center rounded-[10px] bg-[#A0191E] transition-transform active:scale-[0.98]">
                 <Sans.T200
                   as="span"
                   weight="semi-bold"
@@ -153,8 +158,10 @@ export default function Home() {
 
         {/* 로그인 전 버튼 */}
         {!isLogin && (
-          <div className="absolute top-[680px] w-full px-[20px]">
-            <button className="flex h-[52px] w-full items-center justify-center rounded-[10px] bg-label-home transition-transform active:scale-[0.98]">
+          <div className="absolute top-170 w-full px-5">
+            {' '}
+            {/* top-170(680px) */}
+            <button className="flex h-13 w-full items-center justify-center rounded-[10px] bg-label-home transition-transform active:scale-[0.98]">
               <Sans.T200
                 as="span"
                 weight="semi-bold"
@@ -166,13 +173,14 @@ export default function Home() {
           </div>
         )}
       </section>
-
       {/* --- 2. 하단 리스트 영역 --- */}
       {isLogin && (
-        <main className="flex w-full flex-col gap-[40px] px-[20px] py-[24px]">
-          {/* 진행 중 투표 */}
+        <main className="flex w-full flex-col gap-10 px-5 py-6">
+          {' '}
+          {/* gap-10(40px), py-6(24px) */}
+          {/* 진행 중 투표 섹션 */}
           {ongoingVotes.length > 0 && (
-            <section className="flex flex-col gap-[16px]">
+            <section className="flex flex-col gap-4">
               <Sans.T240
                 as="h2"
                 color="heading-page"
@@ -195,10 +203,9 @@ export default function Home() {
               ))}
             </section>
           )}
-
-          {/* 예정된 투표 */}
+          {/* 예정된 투표 섹션 */}
           {scheduledVotes.length > 0 && (
-            <section className="flex flex-col gap-[16px]">
+            <section className="flex flex-col gap-4">
               <Sans.T240
                 as="h2"
                 color="heading-page"
