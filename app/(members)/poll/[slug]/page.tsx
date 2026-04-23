@@ -225,7 +225,7 @@ export default function Page() {
                   submitButtonState === 'enabled' && 'bg-label',
                   submitButtonState === 'soft-disabled' && 'bg-label-home',
                   submitButtonState === 'done-disabled' &&
-                    'bg-label-unavailable',
+                    'bg-[var(--voting-gray-500)]',
                 )}
               >
                 <Sans.T160
@@ -234,7 +234,7 @@ export default function Page() {
                   lineHeight="20px"
                   color={
                     submitButtonState === 'done-disabled'
-                      ? 'label-unavailable'
+                      ? 'label' // 흰색 텍스트
                       : 'label'
                   }
                 >
