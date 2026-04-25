@@ -81,6 +81,7 @@ describe('hooks/queries/usePollQuery', () => {
       options: ['찬성', '반대'],
       status: 'pending',
       sort_order: 1,
+      ended_at: '2026-12-31T23:59:59Z',
     });
 
     const { Wrapper } = createQueryWrapper();
@@ -93,6 +94,7 @@ describe('hooks/queries/usePollQuery', () => {
       question: '신규 안건',
       options: ['찬성', '반대'],
       sort_order: 1,
+      ended_at: '2026-12-31T23:59:59Z',
     });
 
     await waitFor(() => {
@@ -103,6 +105,7 @@ describe('hooks/queries/usePollQuery', () => {
       '신규 안건',
       ['찬성', '반대'],
       1,
+      '2026-12-31T23:59:59Z',
     );
   });
 });

@@ -24,6 +24,7 @@ type CreatePollRequest = {
   question: string;
   options: string[];
   sort_order: number;
+  ended_at: string;
 };
 
 type CreatePollApiResponse = {
@@ -33,6 +34,7 @@ type CreatePollApiResponse = {
   options: string[];
   status: string;
   sort_order: number;
+  ended_at: string;
 };
 
 type CreatePollResponse = ApiSuccessResponse<{
@@ -95,6 +97,7 @@ export const createPoll = async (
   question: string,
   options: string[],
   sort_order: number,
+  ended_at: string,
 ): Promise<CreatePollApiResponse> => {
   try {
     const { data } = await apiClient.post<CreatePollResponse>(
@@ -103,6 +106,7 @@ export const createPoll = async (
         question,
         options,
         sort_order,
+        ended_at,
       } satisfies CreatePollRequest,
     );
 
@@ -147,4 +151,64 @@ export const startPoll = async (id: number): Promise<void> => {
 
 export const endPoll = async (id: number): Promise<void> => {
   await updatePollStatus(id, 'end-poll');
+};
+
+type ByMonthResponse = ApiSuccessResponse<{
+  polls: Array<{
+    results: PollResultItem[];
+  }>;
+}>;
+
+export const getPollsByMonth = async (
+  year: number,
+  month: number,
+): Promise<Array<{ results: PollResultItem[] }>> => {
+  try {
+    const { data } = await apiClient.get<ByMonthResponse>(
+      `/api/polls/by-month?year=${year}&month=${month}`,
+    );
+    return data.polls;
+  } catch (error) {
+    throw new Error(parseApiError(error).message);
+  }
+};
+
+type SelectableSemestersResponse = ApiSuccessResponse<{
+  semesters: Array<{
+    year: number;
+    semester: number;
+  }>;
+}>;
+
+export const getSelectableSemesters = async (): Promise<
+  Array<{ year: number; semester: number }>
+> => {
+  try {
+    const { data } = await apiClient.get<SelectableSemestersResponse>(
+      '/api/polls/selectable-semesters',
+    );
+    return data.semesters;
+  } catch (error) {
+    throw new Error(parseApiError(error).message);
+  }
+};
+
+type BySemesterResponse = ApiSuccessResponse<{
+  polls: Array<{
+    results: PollResultItem[];
+  }>;
+}>;
+
+export const getPollsBySemester = async (
+  year: number,
+  semester: number,
+): Promise<Array<{ results: PollResultItem[] }>> => {
+  try {
+    const { data } = await apiClient.get<BySemesterResponse>(
+      `/api/polls/by-semester?year=${year}&semester=${semester}`,
+    );
+    return data.polls;
+  } catch (error) {
+    throw new Error(parseApiError(error).message);
+  }
 };

@@ -2,6 +2,7 @@
 
 import { createMockPolls, createMockUser } from '@/app/lib/mocks';
 import { Sans } from '@/app/ui/sans';
+import { useCurrentUserQuery } from '@/hooks/queries/useAuthQuery';
 import type { Poll } from '@/types/poll';
 import type { UserProfile } from '@/types/user';
 
@@ -12,6 +13,7 @@ import Link from 'next/link';
 
 /** --- 메인 컴포넌트 --- */
 export default function Home() {
+  const { data: authUser, isLoading, isError, error } = useCurrentUserQuery();
   const [user, setUser] = useState<UserProfile | null>(null);
   const [votes, setVotes] = useState<Poll[] | null>(null);
 
@@ -20,8 +22,18 @@ export default function Home() {
     createMockPolls().then(setVotes);
   }, []);
 
-  if (!user || !votes) {
+  if (isLoading || !user || !votes) {
     return <Sans.T240 as="p">로딩중...</Sans.T240>;
+  }
+
+  if (isError || !authUser) {
+    return (
+      <Sans.T240 as="p">
+        {error instanceof Error
+          ? error.message
+          : '사용자 정보를 불러오는 중 문제가 발생했습니다.'}
+      </Sans.T240>
+    );
   }
 
   // [로직 1] 역할에 따른 필터링

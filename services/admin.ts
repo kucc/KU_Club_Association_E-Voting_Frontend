@@ -6,6 +6,7 @@ type CreateUserRequest = {
   username: string;
   password: string;
   isAdmin: boolean;
+  isSubstitute: boolean;
 };
 
 type CreateUserResponse = ApiSuccessResponse<{
@@ -45,6 +46,7 @@ export const createUser = async (
   username: string,
   password: string,
   isAdmin: boolean,
+  isSubstitute: boolean,
 ): Promise<User> => {
   try {
     const { data } = await apiClient.post<CreateUserResponse>(
@@ -53,6 +55,7 @@ export const createUser = async (
         username,
         password,
         isAdmin,
+        isSubstitute,
       } satisfies CreateUserRequest,
     );
 

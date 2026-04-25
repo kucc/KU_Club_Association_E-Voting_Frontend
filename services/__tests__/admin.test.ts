@@ -14,6 +14,7 @@ describe('services/admin', () => {
           username: string;
           password: string;
           isAdmin: boolean;
+          isSubstitute: boolean;
         };
 
         return HttpResponse.json(
@@ -22,7 +23,8 @@ describe('services/admin', () => {
             user: {
               id: 1,
               username: body.username,
-              is_admin: body.isAdmin,
+              isAdmin: body.isAdmin,
+              isSubstitute: body.isSubstitute,
               created_at: '2026-04-19T13:17:08.862Z',
             },
           },
@@ -31,10 +33,10 @@ describe('services/admin', () => {
       }),
     );
 
-    const user = await createUser('신규동아리', 'password123', false);
+    const user = await createUser('신규동아리', 'password123', false, false);
 
     expect(user.username).toBe('신규동아리');
-    expect(user.is_admin).toBe(false);
+    expect(user.isAdmin).toBe(false);
   });
 
   test('editUser: 수정된 유저를 반환한다', async () => {

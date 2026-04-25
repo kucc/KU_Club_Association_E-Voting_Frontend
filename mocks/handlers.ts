@@ -36,6 +36,7 @@ export const handlers = [
         id: 1,
         username: 'KUCC',
         isAdmin: true,
+        isSubstitute: false,
       },
     });
   }),
@@ -47,6 +48,7 @@ export const handlers = [
         id: 1,
         username: 'KUCC',
         isAdmin: true,
+        isSubstitute: false,
       },
     });
   }),
@@ -113,6 +115,7 @@ export const handlers = [
       question: string;
       options: string[];
       sort_order: number;
+      ended_at: string;
     };
 
     return HttpResponse.json(
@@ -125,6 +128,7 @@ export const handlers = [
           options: body.options,
           status: 'pending',
           sort_order: body.sort_order,
+          ended_at: body.ended_at,
         },
       },
       { status: 201 },
@@ -199,6 +203,7 @@ export const handlers = [
       username: string;
       password: string;
       isAdmin: boolean;
+      isSubstitute: boolean;
     };
 
     return HttpResponse.json(
@@ -208,6 +213,7 @@ export const handlers = [
           id: 1,
           username: body.username,
           is_admin: body.isAdmin,
+          is_substitute: body.isSubstitute,
           created_at: '2026-04-19T13:17:08.862Z',
         },
       },
@@ -354,6 +360,72 @@ export const handlers = [
         selected: '찬성',
         cast_at: '2026-04-19T13:17:08.939Z',
       },
+    });
+  }),
+
+  http.get(`${BASE_URL}/api/polls/by-month`, ({ request }) => {
+    const url = new URL(request.url);
+    const year = url.searchParams.get('year');
+    const month = url.searchParams.get('month');
+
+    if (!year || !month) {
+      return HttpResponse.json(
+        {
+          status: 'error',
+          message: 'year 또는 month 누락',
+        },
+        { status: 400 },
+      );
+    }
+
+    return HttpResponse.json({
+      status: 'ok',
+      polls: [
+        {
+          results: [
+            { selected: '찬성', count: 15 },
+            { selected: '반대', count: 8 },
+          ],
+        },
+      ],
+    });
+  }),
+
+  http.get(`${BASE_URL}/api/polls/selectable-semesters`, () => {
+    return HttpResponse.json({
+      status: 'ok',
+      semesters: [
+        { year: 2026, semester: 1 },
+        { year: 2025, semester: 2 },
+      ],
+    });
+  }),
+
+  http.get(`${BASE_URL}/api/polls/by-semester`, ({ request }) => {
+    const url = new URL(request.url);
+    const year = url.searchParams.get('year');
+    const semester = url.searchParams.get('semester');
+
+    if (!year || !semester) {
+      return HttpResponse.json(
+        {
+          status: 'error',
+          message: 'year 또는 semester 누락',
+        },
+        { status: 400 },
+      );
+    }
+
+    return HttpResponse.json({
+      status: 'ok',
+      polls: [
+        {
+          results: [
+            { selected: '찬성', count: 15 },
+            { selected: '반대', count: 8 },
+          ],
+        },
+      ],
     });
   }),
 ];

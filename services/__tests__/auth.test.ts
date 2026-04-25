@@ -14,6 +14,7 @@ describe('services/auth', () => {
       id: 1,
       username: 'KUCC',
       isAdmin: true,
+      isSubstitute: false,
     });
   });
 
@@ -26,6 +27,7 @@ describe('services/auth', () => {
 
     expect(user.username).toBe('KUCC');
     expect(user.isAdmin).toBe(true);
+    expect(user.isSubstitute).toBe(false);
   });
 
   test('signOut: 로그아웃 성공 시 에러 없이 종료된다', async () => {
@@ -38,8 +40,5 @@ describe('services/auth', () => {
         return HttpResponse.error();
       }),
     );
-
-    // ECONNABORTED 자체를 MSW만으로 만들긴 애매해서
-    // 이 케이스는 apiClient adapter mocking이나 axios spy로 별도 테스트하는 편이 더 정확합니다.
   });
 });

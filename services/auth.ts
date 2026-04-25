@@ -1,3 +1,5 @@
+import type { User } from '@/types/user';
+
 import { type ApiSuccessResponse, apiClient, parseApiError } from './api';
 
 type SignInRequest = {
@@ -5,14 +7,8 @@ type SignInRequest = {
   password: string;
 };
 
-type AuthUser = {
-  id: number;
-  username: string;
-  isAdmin: boolean;
-};
-
 type AuthUserResponse = ApiSuccessResponse<{
-  user: AuthUser;
+  user: User;
 }>;
 
 type LogoutResponse = ApiSuccessResponse<Record<string, never>>;
@@ -20,7 +16,7 @@ type LogoutResponse = ApiSuccessResponse<Record<string, never>>;
 export const signIn = async (
   username: string,
   password: string,
-): Promise<AuthUser> => {
+): Promise<User> => {
   try {
     const { data } = await apiClient.post<AuthUserResponse>('/api/auth/login', {
       username,
@@ -43,7 +39,7 @@ export const signOut = async (): Promise<void> => {
   }
 };
 
-export const getCurrentUser = async (): Promise<AuthUser> => {
+export const getCurrentUser = async (): Promise<User> => {
   try {
     const { data } = await apiClient.get<AuthUserResponse>('/api/auth/me');
 

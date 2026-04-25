@@ -59,6 +59,7 @@ describe('services/polls', () => {
           question: string;
           options: string[];
           sort_order: number;
+          ended_at: string;
         };
 
         return HttpResponse.json(
@@ -71,6 +72,7 @@ describe('services/polls', () => {
               options: body.options,
               status: 'pending',
               sort_order: body.sort_order,
+              ended_at: body.ended_at,
             },
           },
           { status: 201 },
@@ -78,7 +80,12 @@ describe('services/polls', () => {
       }),
     );
 
-    const poll = await createPoll('신규 안건', ['찬성', '반대'], 1);
+    const poll = await createPoll(
+      '신규 안건',
+      ['찬성', '반대'],
+      1,
+      '2026-12-31T23:59:59Z',
+    );
 
     expect(poll.question).toBe('신규 안건');
     expect(poll.options).toEqual(['찬성', '반대']);

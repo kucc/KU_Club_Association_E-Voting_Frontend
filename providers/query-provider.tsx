@@ -15,6 +15,10 @@ export function QueryProvider({ children }: Props) {
         defaultOptions: {
           queries: {
             retry: false,
+            staleTime: 1000 * 60 * 5, // 5분
+            gcTime: 1000 * 60 * 30, // 30분
+            refetchOnWindowFocus: true,
+            refetchOnReconnect: true,
           },
           mutations: {
             retry: false,
