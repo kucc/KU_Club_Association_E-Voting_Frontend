@@ -54,33 +54,22 @@ function VoteOptionItem({ label, checked, onSelect }: VoteOptionItemProps) {
       aria-pressed={checked}
       className={cn(
         'flex h-11 w-full items-center gap-2 rounded-[10px] border bg-background-section px-4 py-3 text-left',
-        checked
-          ? 'border-[var(--voting-crimson-main)]'
-          : 'border-[var(--voting-gray-300)]',
+        checked ? 'border-text-label-select' : 'border-text-label-not-select',
       )}
     >
       <span className="relative block size-3 shrink-0">
         {checked ? (
-          <span className="absolute inset-0 flex items-center justify-center rounded-full bg-[var(--voting-crimson-main)]">
-            <svg
-              width="8"
-              height="7"
-              viewBox="0 0 8 7"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
+          <span className="absolute inset-0 flex items-center justify-center rounded-full bg-text-label-select">
+            <Image
+              src="/icons/small_union.svg"
+              alt="투표 선택됨"
+              width={8}
+              height={7}
               aria-hidden="true"
-            >
-              <path
-                d="M1 3.5L3 5.5L7 1"
-                stroke="white"
-                strokeWidth="1.2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
+            />
           </span>
         ) : (
-          <span className="absolute inset-0 rounded-full border border-[var(--voting-gray-300)]" />
+          <span className="absolute inset-0 rounded-full border border-text-label-not-select" />
         )}
       </span>
 
@@ -116,6 +105,7 @@ export default function Page() {
   );
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [isSubmittedState, setIsSubmittedState] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
 
   const labels = useMemo<LabelType[]>(
     () => [
@@ -152,6 +142,7 @@ export default function Page() {
     // API 연결 시:
     //   최초 투표 → POST /api/votes/vote { poll_id, selected }
     //   수정 투표 → PATCH /api/votes/edit-vote { poll_id, selected }
+    setIsEditMode(hasExistingVote);
     setCurrentVote(selectedOption);
     setIsSubmittedState(true);
     setShowSuccessModal(true);
@@ -224,8 +215,7 @@ export default function Page() {
                   'flex h-11 w-full items-center justify-center rounded-[10px] px-2.5 py-3',
                   submitButtonState === 'enabled' && 'bg-label',
                   submitButtonState === 'soft-disabled' && 'bg-label-home',
-                  submitButtonState === 'done-disabled' &&
-                    'bg-[var(--voting-gray-500)]',
+                  submitButtonState === 'done-disabled' && 'bg-label-success',
                 )}
               >
                 <Sans.T160
@@ -246,8 +236,12 @@ export default function Page() {
         </div>
       </div>
 
+      {/* VoteSuccessModal 렌더링 */}
       {showSuccessModal ? (
-        <VoteSuccessModal onClose={() => setShowSuccessModal(false)} />
+        <VoteSuccessModal
+          onClose={() => setShowSuccessModal(false)}
+          isEdit={isEditMode}
+        />
       ) : null}
     </main>
   );
