@@ -2,13 +2,13 @@
 
 import { Sans } from '@/app/ui/sans';
 
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 
 import Card from '@/components/common/card';
-import Labels, { type LabelType } from '@/components/common/card/labels';
+import Label from '@/components/common/card/label';
 import Title from '@/components/common/card/title';
 
 import { cn, formatDate } from '@/lib/utils';
@@ -19,9 +19,9 @@ type MockPoll = {
   id: number;
   slug: string;
   question: string;
-  description: string;
-  proposer: string;
-  endedAt: string;
+  description: string; //mock 전용
+  proposer: string; //mock 전용
+  ended_at: string;
   options: string[];
 };
 
@@ -33,7 +33,7 @@ const MOCK_POLLS: MockPoll[] = [
     description:
       '투표 설명 어쩌고 저쩌고...\n무슨 투표인지\n뭐시기뭐시기\n어쩌고저쩌고',
     proposer: '홍길동',
-    endedAt: '2026-04-08T10:00:00.000Z',
+    ended_at: '2026-04-08T10:00:00.000Z',
     options: ['찬성', '반대', '기권'],
   },
 ];
@@ -54,22 +54,34 @@ function VoteOptionItem({ label, checked, onSelect }: VoteOptionItemProps) {
       aria-pressed={checked}
       className={cn(
         'flex h-11 w-full items-center gap-2 rounded-[10px] border bg-background-section px-4 py-3 text-left',
-        checked ? 'border-text-label-select' : 'border-text-label-not-select',
+        checked
+          ? 'border-[color:var(--color-text-label-select)]'
+          : 'border-[color:var(--color-text-label-not-select)]',
       )}
     >
       <span className="relative block size-3 shrink-0">
         {checked ? (
-          <span className="absolute inset-0 flex items-center justify-center rounded-full bg-text-label-select">
+          <span
+            className={cn(
+              'absolute inset-0 flex items-center justify-center rounded-full',
+              'bg-[color:var(--color-text-label-select)]',
+            )}
+          >
             <Image
               src="/icons/small_union.svg"
               alt="투표 선택됨"
-              width={8}
-              height={7}
+              width={6}
+              height={6}
               aria-hidden="true"
             />
           </span>
         ) : (
-          <span className="absolute inset-0 rounded-full border border-text-label-not-select" />
+          <span
+            className={cn(
+              'absolute inset-0 rounded-full border',
+              'border-[color:var(--color-text-label-not-select)]',
+            )}
+          />
         )}
       </span>
 
@@ -107,14 +119,6 @@ export default function Page() {
   const [isSubmittedState, setIsSubmittedState] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
 
-  const labels = useMemo<LabelType[]>(
-    () => [
-      { name: '마감 기한', content: `${formatDate(poll.endedAt)}에 종료` },
-      { name: '발의자', content: poll.proposer },
-    ],
-    [poll.endedAt, poll.proposer],
-  );
-
   const hasExistingVote = currentVote !== null;
   const hasChangedSelection = selectedOption !== currentVote;
   const canSubmit =
@@ -151,7 +155,7 @@ export default function Page() {
   return (
     <main className="theme-default min-h-screen bg-background">
       <div className="pt-4">
-        <header className="flex h-11 items-center gap-3 px-5">
+        <header className="flex h-11 items-center gap-4 px-5">
           <button
             type="button"
             aria-label="뒤로가기"
@@ -183,8 +187,16 @@ export default function Page() {
             <div className="flex flex-col gap-5">
               <Title content={poll.question} />
 
-              <Labels labels={labels} />
-
+              <div className="flex flex-col gap-2">
+                <Label
+                  name="마감 기한"
+                  content={`${formatDate(poll.ended_at)}에 종료`}
+                />
+                <Label
+                  name="발의자"
+                  content={poll.proposer}
+                />
+              </div>
               <Sans.T140
                 as="p"
                 color="title-value"
@@ -222,11 +234,7 @@ export default function Page() {
                   as="span"
                   weight="semi-bold"
                   lineHeight="20px"
-                  color={
-                    submitButtonState === 'done-disabled'
-                      ? 'label' // 흰색 텍스트
-                      : 'label'
-                  }
+                  color="label"
                 >
                   {submitButtonLabel}
                 </Sans.T160>
