@@ -3,6 +3,7 @@
 import { createMockPolls, createMockUser } from '@/app/lib/mocks';
 import { Sans } from '@/app/ui/sans';
 import { useCurrentUserQuery } from '@/hooks/queries/useAuthQuery';
+import { useTheme } from '@/providers/theme-provider';
 import type { Poll } from '@/types/poll';
 import type { UserProfile } from '@/types/user';
 
@@ -14,6 +15,7 @@ import Link from 'next/link';
 /** --- 메인 컴포넌트 --- */
 export default function Home() {
   const { data: authUser, isLoading, isError, error } = useCurrentUserQuery();
+  const { setTheme } = useTheme();
   const [user, setUser] = useState<UserProfile | null>(null);
   const [votes, setVotes] = useState<Poll[] | null>(null);
 
@@ -22,8 +24,29 @@ export default function Home() {
     createMockPolls().then(setVotes);
   }, []);
 
+  useEffect(() => {
+    if (user) {
+      if (user.role === 'EXECUTIVE') {
+        setTheme('theme-executive');
+      } else if (user.role === 'AGENT') {
+        setTheme('theme-agent');
+      } else {
+        setTheme('theme-default');
+      }
+    }
+  }, [user, setTheme]);
+
   if (isLoading || !user || !votes) {
-    return <Sans.T240 as="p">로딩중...</Sans.T240>;
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <Sans.T240
+          as="p"
+          color="heading-page"
+        >
+          로딩 중...
+        </Sans.T240>
+      </div>
+    );
   }
 
   if (isError || !authUser) {
