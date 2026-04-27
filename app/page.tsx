@@ -1,78 +1,124 @@
 'use client';
 
+import { createMockPolls, createMockUser } from '@/app/lib/mocks';
 import { Sans } from '@/app/ui/sans';
+import type { Poll } from '@/types/poll';
+import type { UserProfile } from '@/types/user';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import Image from 'next/image';
+import Link from 'next/link';
+
+import PollCard from '@/components/common/poll-card';
+import ScheduledCard from '@/components/common/scheduled-card';
 
 export default function Home() {
-  // 1. 로그인 상태를 관리하는 스위치 (true: 로그인 후, false: 로그인 전)
-  const [isLogin] = useState(true);
+  const [user, setUser] = useState<UserProfile | null>(null);
+  const [votes, setVotes] = useState<Poll[] | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    Promise.all([createMockUser(), createMockPolls()]).then(
+      ([userData, pollData]) => {
+        setUser(userData);
+        const sanitizedData = pollData.map((v) => ({
+          ...v,
+          deadline: v.deadline.includes('T')
+            ? v.deadline
+            : `20${v.deadline.replace(/\./g, '-').replace(' ', 'T')}:00`,
+        }));
+        setVotes(sanitizedData);
+        setIsLoading(false);
+      },
+    );
+  }, []);
+
+  if (isLoading) return null;
+
+  const isManager = user?.role === 'EXECUTIVE';
+  const isLogin = !!user;
+
+  const ongoingVotes = (votes || []).filter((v) => v.isOngoing);
+  const scheduledVotes = (votes || []).filter(
+    (v) => !v.isOngoing && !v.resultStatus,
+  );
 
   return (
-    <div className="min-h-screen bg-voting-mint-high pb-[80px]">
-      {/* --- 1. 상단 민트색 헤더 섹션 --- */}
-      {/* 로그인 여부에 따라 높이가 526px 또는 752px로 변함 */}
+    <div className="min-h-screen bg-background pb-20">
+      {' '}
+      {/* pb-20 (80px) */}
+      {/* --- 1. 상단 히어로(Hero) 섹션 --- */}
       <section
-        className={`relative flex ${isLogin ? 'h-[526px]' : 'h-[752px]'} w-full flex-col rounded-b-[20px] bg-voting-mint transition-all duration-300`}
+        className={`relative flex ${
+          // 💡 Canonical Classes 적용 (높이)
+          !isLogin ? 'h-188' : isManager ? 'h-150.5' : 'h-131.5'
+        } w-full flex-col rounded-b-[20px] ${
+          // 💡 곡률 복구 완료!
+          isManager ? 'bg-[#FFDCDE]' : 'bg-hero-card'
+        } shadow-[0_0_60px_rgba(0,0,0,0.04)] transition-all duration-300`}
       >
         {/* 아이콘 영역 */}
         {isLogin ? (
-          // 로그인 후: 양옆 배치 (로고, 프로필)
-          <div className="mt-[62px] flex h-[44px] w-full items-center justify-between gap-[12px] px-[20px]">
+          <div className="absolute top-15.5 flex h-11 w-full items-center justify-between px-5">
+            {' '}
+            {/* top-15.5(62px), h-11(44px) */}
             <Image
               src="/icons/logo_poll.svg"
               alt="logo"
               width={28}
               height={28}
+              className={isManager ? '' : 'brightness-0 invert'}
             />
             <Image
               src="/icons/profile.svg"
               alt="profile"
               width={28}
               height={28}
+              className={isManager ? '' : 'brightness-0 invert'}
             />
           </div>
         ) : (
-          // 로그인 전: 중앙 배치 (로고만)
-          <div className="absolute top-[62px] left-1/2 -translate-x-1/2">
+          <div className="absolute top-15.5 left-1/2 -translate-x-1/2">
             <Image
               src="/icons/logo_poll.svg"
               alt="logo"
               width={28}
               height={28}
+              className="brightness-0 invert"
             />
           </div>
         )}
 
         {/* 타이틀 및 문구 영역 */}
         <div
-          className={`${isLogin ? 'mt-[116px]' : 'absolute top-[277px]'} flex w-full flex-col items-start justify-center gap-[10px] px-[20px] py-[10px]`}
+          className={`absolute top-1/2 -translate-y-1/2 ${
+            isLogin && !isManager ? 'mt-14.5' : '' // mt-14.5(58px)
+          } flex w-full flex-col items-start justify-center gap-2.5 px-5 py-2.5`} // gap, px, py 2.5(10px)
         >
           <Sans.T400
             as="h1"
             weight="bold"
-            color="heading-page"
+            color={isManager ? 'label-home' : 'hero'}
           >
-            <span className="block leading-[48px] tracking-[-0.04em]">
+            <span className="block leading-[48px] tracking-[-1px]">
               {'고려대학교\n동아리연합회\n온라인투표시스템'}
             </span>
           </Sans.T400>
 
-          {/* 문구 조건부 렌더링 */}
           {isLogin ? (
-            <div>
+            <div className="flex flex-row items-center gap-1">
               <Sans.T200
                 as="span"
                 weight="bold"
-                color="heading-page"
+                color={isManager ? 'label-home' : 'hero'}
               >
-                오승민
+                {user?.name}
               </Sans.T200>
               <Sans.T200
                 as="span"
-                color="heading-page"
+                weight="medium"
+                color={isManager ? 'label-home' : 'hero'}
               >
                 님 환영합니다
               </Sans.T200>
@@ -80,189 +126,104 @@ export default function Home() {
           ) : (
             <Sans.T200
               as="p"
-              color="heading-page"
+              weight="medium"
+              color="hero"
             >
-              어떤 문구가 좋을까요
+              © KUCC
             </Sans.T200>
           )}
         </div>
 
-        {/* --- 로그인 전일 때만 보이는 [로그인 후 이용] 버튼  --- */}
+        {/* 관리자 바로가기 버튼 */}
+        {isManager && (
+          <div className="absolute bottom-6 w-full px-5">
+            {' '}
+            {/* bottom-6(24px) */}
+            <Link
+              href="/admin"
+              className="w-full"
+            >
+              <button className="flex h-13 w-full items-center justify-center rounded-[10px] bg-[#A0191E] transition-transform active:scale-[0.98]">
+                <Sans.T200
+                  as="span"
+                  weight="semi-bold"
+                  className="text-white"
+                >
+                  관리자 모드 바로가기
+                </Sans.T200>
+              </button>
+            </Link>
+          </div>
+        )}
+
+        {/* 로그인 전 버튼 */}
         {!isLogin && (
-          <div className="absolute top-[680px] w-full px-[20px]">
-            <button className="flex h-[48px] w-full items-center justify-center rounded-[10px] bg-voting-black text-[20px] font-semibold text-voting-text-white transition-transform active:scale-[0.98]">
-              로그인 후 이용
+          <div className="absolute top-170 w-full px-5">
+            {' '}
+            {/* top-170(680px) */}
+            <button className="flex h-13 w-full items-center justify-center rounded-[10px] bg-label-home transition-transform active:scale-[0.98]">
+              <Sans.T200
+                as="span"
+                weight="semi-bold"
+                color="label-home"
+              >
+                로그인 후 이용
+              </Sans.T200>
             </button>
           </div>
         )}
       </section>
-
-      {/* --- 2. 로그인 했을 때만 보이는 [투표 리스트] --- */}
+      {/* --- 2. 하단 리스트 영역 --- */}
       {isLogin && (
-        <main className="flex w-full flex-col gap-[40px] px-[20px] py-[24px]">
-          {/* 지금 진행 중인 투표 섹션 */}
-          <section className="flex flex-col gap-[16px]">
-            <Sans.T240
-              as="h2"
-              color="heading-page"
-            >
-              <span className="font-semibold tracking-[-0.02em]">
+        <main className="flex w-full flex-col gap-10 px-5 py-6">
+          {' '}
+          {/* gap-10(40px), py-6(24px) */}
+          {/* 진행 중 투표 섹션 */}
+          {ongoingVotes.length > 0 && (
+            <section className="flex flex-col gap-4">
+              <Sans.T240
+                as="h2"
+                color="heading-page"
+                weight="bold"
+              >
                 지금 진행 중인 투표
-              </span>
-            </Sans.T240>
-            <div className="flex flex-col gap-[20px] rounded-[16px] bg-white p-[24px] shadow-sm">
-              <Sans.T200
-                as="h3"
-                weight="bold"
-                color="heading-page"
-              >
-                제1회 동아리연합회장 선거
-              </Sans.T200>
-              <div className="flex flex-col gap-[12px]">
-                <div className="flex gap-[16px]">
-                  <Sans.T140
-                    as="span"
-                    color="input-placeholder"
-                    className="w-[55px]"
-                  >
-                    기간
-                  </Sans.T140>
-                  <Sans.T140
-                    as="span"
-                    color="title-subvalue"
-                  >
-                    26.04.07 16:00에 종료
-                  </Sans.T140>
-                </div>
-                <div className="flex gap-[16px]">
-                  <Sans.T140
-                    as="span"
-                    color="input-placeholder"
-                    className="w-[55px]"
-                  >
-                    투표 현황
-                  </Sans.T140>
-                  <Sans.T140
-                    as="span"
-                    color="title-subvalue"
-                  >
-                    투표하고 확인
-                  </Sans.T140>
-                </div>
-              </div>
-              <button className="flex h-[40px] w-full items-center justify-center rounded-[10px] bg-voting-black text-[14px] font-semibold text-voting-text-white active:scale-[0.98]">
-                투표하기
-              </button>
-            </div>
-          </section>
-
+              </Sans.T240>
+              {ongoingVotes.map((vote) => (
+                <PollCard
+                  key={vote.id}
+                  title={vote.title}
+                  deadline={vote.deadline}
+                  statistics={{
+                    quota: vote.totalParticipants || 0,
+                    votes: vote.currentCount || 0,
+                  }}
+                  myVote={vote.myVote}
+                  isAdmin={isManager}
+                />
+              ))}
+            </section>
+          )}
           {/* 예정된 투표 섹션 */}
-          <section className="flex flex-col gap-[16px]">
-            <Sans.T240
-              as="h2"
-              color="heading-page"
-            >
-              <span className="font-semibold tracking-[-0.02em]">
+          {scheduledVotes.length > 0 && (
+            <section className="flex flex-col gap-4">
+              <Sans.T240
+                as="h2"
+                color="heading-page"
+                weight="bold"
+              >
                 예정된 투표
-              </span>
-            </Sans.T240>
-            <div className="flex flex-col gap-[20px] rounded-[16px] bg-white p-[24px] shadow-sm">
-              <Sans.T200
-                as="h3"
-                weight="bold"
-                color="heading-page"
-              >
-                제1회 동아리연합회장 선거
-              </Sans.T200>
-              <div className="flex gap-[8px]">
-                <div className="flex gap-[16px]">
-                  <Sans.T140
-                    as="span"
-                    color="input-placeholder"
-                    className="w-[55px] whitespace-nowrap"
-                  >
-                    기간
-                  </Sans.T140>
-                  <Sans.T140
-                    as="span"
-                    color="title-subvalue"
-                  >
-                    26.04.07 16:00에 시작
-                  </Sans.T140>
-                </div>
+              </Sans.T240>
+              <div className="flex flex-col gap-4">
+                {scheduledVotes.map((vote) => (
+                  <ScheduledCard
+                    key={vote.id}
+                    title={vote.title}
+                    openingTime={vote.deadline}
+                  />
+                ))}
               </div>
-              <button
-                disabled
-                className="flex h-[40px] w-full cursor-not-allowed items-center justify-center rounded-[10px] bg-voting-disabled text-[14px] font-semibold text-voting-text-white"
-              >
-                투표하기
-              </button>
-            </div>
-            <div className="flex flex-col gap-[20px] rounded-[16px] bg-white p-[24px] shadow-sm">
-              <Sans.T200
-                as="h3"
-                weight="bold"
-                color="heading-page"
-              >
-                제1회 동아리연합회장 선거
-              </Sans.T200>
-              <div className="flex gap-[8px]">
-                <div className="flex gap-[16px]">
-                  <Sans.T140
-                    as="span"
-                    color="input-placeholder"
-                    className="w-[55px] whitespace-nowrap"
-                  >
-                    기간
-                  </Sans.T140>
-                  <Sans.T140
-                    as="span"
-                    color="title-subvalue"
-                  >
-                    26.04.07 16:00에 시작
-                  </Sans.T140>
-                </div>
-              </div>
-              <button
-                disabled
-                className="flex h-[40px] w-full cursor-not-allowed items-center justify-center rounded-[10px] bg-voting-disabled text-[14px] font-semibold text-voting-text-white"
-              >
-                투표하기
-              </button>
-            </div>
-            <div className="flex flex-col gap-[20px] rounded-[16px] bg-white p-[24px] shadow-sm">
-              <Sans.T200
-                as="h3"
-                weight="bold"
-                color="heading-page"
-              >
-                제1회 동아리연합회장 선거
-              </Sans.T200>
-              <div className="flex gap-[8px]">
-                <div className="flex gap-[16px]">
-                  <Sans.T140
-                    as="span"
-                    color="input-placeholder"
-                    className="w-[55px] whitespace-nowrap"
-                  >
-                    기간
-                  </Sans.T140>
-                  <Sans.T140
-                    as="span"
-                    color="title-subvalue"
-                  >
-                    26.04.07 16:00에 시작
-                  </Sans.T140>
-                </div>
-              </div>
-              <button
-                disabled
-                className="flex h-[40px] w-full cursor-not-allowed items-center justify-center rounded-[10px] bg-voting-disabled text-[14px] font-semibold text-voting-text-white"
-              >
-                투표하기
-              </button>
-            </div>
-          </section>
+            </section>
+          )}
         </main>
       )}
     </div>
