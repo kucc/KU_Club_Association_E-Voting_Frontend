@@ -1,7 +1,7 @@
 'use client';
 
 import { Sans } from '@/app/ui/sans';
-import { createUser, deleteUser, editUser } from '@/services/admin';
+import { createUser, deleteUser, editUser, getUsers } from '@/services/admin';
 import { getCurrentUser, signIn, signOut } from '@/services/auth';
 import {
   createPoll,
@@ -26,6 +26,12 @@ import { useState } from 'react';
 
 type JsonValue = unknown;
 
+type SmokeResult = {
+  label: string;
+  status: 'pass' | 'fail';
+  detail: string;
+};
+
 export default function Page() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -39,6 +45,7 @@ export default function Page() {
   const [adminPassword, setAdminPassword] = useState('');
   const [adminIsAdmin, setAdminIsAdmin] = useState(false);
   const [adminIsSubstitute, setAdminIsSubstitute] = useState(false);
+  const [adminOriginalUserId, setAdminOriginalUserId] = useState('');
   const [targetUserName, setTargetUserName] = useState('');
   const [changeName, setChangeName] = useState('');
   const [changePw, setChangePw] = useState('');
@@ -55,11 +62,20 @@ export default function Page() {
   const [resultError, setResultError] = useState<string>('');
   const [isPending, setIsPending] = useState(false);
 
+  const [smokeResults, setSmokeResults] = useState<SmokeResult[]>([]);
+  const [isSmokePending, setIsSmokePending] = useState(false);
+
   const parsedPollId = Number(pollId);
   const parsedOptions = optionsText
     .split('\n')
     .map((item) => item.trim())
     .filter(Boolean);
+
+  // 빈 문자열 → null(본계정), 숫자 문자열 → number(대리인)
+  const parsedOriginalUserId =
+    adminOriginalUserId.trim() === ''
+      ? null
+      : Number(adminOriginalUserId.trim());
 
   const run = async (title: string, action: () => Promise<unknown>) => {
     setIsPending(true);
@@ -81,12 +97,110 @@ export default function Page() {
     }
   };
 
+  //  Smoke Tests
+  // 1차 완료 조건 검증:
+  //   (a) createUser — originalUserId: null 포함 본계정 생성
+  //   (b) getUsers   — 배열 반환 확인 + 본계정 id 보완
+  //   (c) substitute — 대리인 생성 흐름 확인
+  //
+  // ⚠️ 실제 백엔드 연결 상태에서만 의미 있음.
+  //    smoke용 계정은 테스트 후 Admin 섹션 "유저 삭제"로 직접 정리해주세요.
+  const runSmokeTests = async () => {
+    if (adminUsername.trim() === '' || adminPassword.trim() === '') {
+      alert(
+        'Admin 섹션의 "생성할 username"과 "생성할 password"를 입력한 뒤 실행해주세요.',
+      );
+      return;
+    }
+
+    setIsSmokePending(true);
+    setSmokeResults([]);
+
+    const results: SmokeResult[] = [];
+
+    const check = async (label: string, fn: () => Promise<void>) => {
+      try {
+        await fn();
+        results.push({ label, status: 'pass', detail: 'ok' });
+      } catch (e) {
+        results.push({
+          label,
+          status: 'fail',
+          detail: e instanceof Error ? e.message : String(e),
+        });
+      }
+    };
+
+    const smokeUsername = `${adminUsername}_smoke_${Date.now()}`;
+    let createdUserId: number | null = null;
+
+    // (a) createUser — originalUserId: null 본계정 생성
+    await check('(a) createUser (originalUserId: null)', async () => {
+      const user = await createUser(
+        smokeUsername,
+        adminPassword,
+        false,
+        false,
+        null,
+      );
+      if (!user.username) throw new Error('응답에 username 없음');
+      if (user.isSubstitute) throw new Error('본계정인데 isSubstitute가 true');
+      if (user.original_user_id !== null)
+        throw new Error('본계정인데 original_user_id가 null이 아님');
+      createdUserId = user.id ?? null;
+    });
+
+    // (b) getUsers — 배열 반환 + 본계정 id 보완
+    await check('(b) getUsers', async () => {
+      const users = await getUsers();
+      if (!Array.isArray(users)) throw new Error('응답이 배열이 아님');
+      if (users.length === 0) throw new Error('유저 목록이 비어 있음');
+      if (createdUserId === null) {
+        const found = users.find((u) => u.username === smokeUsername);
+        createdUserId = found?.id ?? null;
+      }
+    });
+
+    // (c) substitute createUser — 대리인 생성 흐름
+    const substituteUsername = `${smokeUsername}_sub`;
+
+    await check(
+      '(c) substitute createUser (originalUserId: 본계정 id)',
+      async () => {
+        if (createdUserId === null) {
+          throw new Error(
+            '본계정 id를 알 수 없음 — (a) 또는 (b) 단계가 실패했을 수 있음',
+          );
+        }
+        const sub = await createUser(
+          substituteUsername,
+          adminPassword,
+          false,
+          true,
+          createdUserId,
+        );
+        if (!sub.username) throw new Error('대리인 응답에 username 없음');
+        // normalizeUser 이후이므로 camelCase로 참조
+        if (!sub.isSubstitute)
+          throw new Error('대리인 응답에 isSubstitute가 true가 아님');
+        if (sub.original_user_id !== createdUserId)
+          throw new Error(
+            `original_user_id 불일치: 기대 ${createdUserId}, 실제 ${sub.original_user_id}`,
+          );
+      },
+    );
+
+    setSmokeResults(results);
+    setIsSmokePending(false);
+  };
+
   return (
     <div className="min-h-screen p-5">
       <Sans.T240 as="h1">API 연동 테스트 페이지</Sans.T240>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_420px]">
         <div className="grid gap-6">
+          {/*  1. Auth  */}
           <section className="rounded-xl border p-4">
             <Sans.T200 as="h2">1. Auth</Sans.T200>
 
@@ -94,6 +208,7 @@ export default function Page() {
               <input
                 className="rounded-lg border px-3 py-2"
                 placeholder="username"
+                autoComplete="username"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
               />
@@ -101,6 +216,7 @@ export default function Page() {
                 className="rounded-lg border px-3 py-2"
                 placeholder="password"
                 type="password"
+                autoComplete="current-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
@@ -111,9 +227,7 @@ export default function Page() {
                 className="rounded-lg border px-4 py-2"
                 disabled={isPending}
                 onClick={() =>
-                  run('POST /api/auth/login', async () =>
-                    signIn(username, password),
-                  )
+                  run('POST /api/auth/login', () => signIn(username, password))
                 }
               >
                 로그인
@@ -122,9 +236,7 @@ export default function Page() {
               <button
                 className="rounded-lg border px-4 py-2"
                 disabled={isPending}
-                onClick={() =>
-                  run('GET /api/auth/me', async () => getCurrentUser())
-                }
+                onClick={() => run('GET /api/auth/me', () => getCurrentUser())}
               >
                 현재 사용자 조회
               </button>
@@ -144,6 +256,7 @@ export default function Page() {
             </div>
           </section>
 
+          {/*  2. Polls  */}
           <section className="rounded-xl border p-4">
             <Sans.T200 as="h2">2. Polls</Sans.T200>
 
@@ -151,6 +264,7 @@ export default function Page() {
               <input
                 className="rounded-lg border px-3 py-2"
                 placeholder="poll id"
+                autoComplete="off"
                 value={pollId}
                 onChange={(e) => setPollId(e.target.value)}
               />
@@ -202,7 +316,7 @@ export default function Page() {
               <button
                 className="rounded-lg border px-4 py-2"
                 disabled={isPending}
-                onClick={() => run('GET /api/polls', async () => getPolls())}
+                onClick={() => run('GET /api/polls', () => getPolls())}
               >
                 투표 목록 조회
               </button>
@@ -211,7 +325,7 @@ export default function Page() {
                 className="rounded-lg border px-4 py-2"
                 disabled={isPending || !Number.isFinite(parsedPollId)}
                 onClick={() =>
-                  run('POST /api/polls/poll-results', async () =>
+                  run('POST /api/polls/poll-results', () =>
                     getPollResults(parsedPollId),
                   )
                 }
@@ -227,7 +341,7 @@ export default function Page() {
                   parsedOptions.length === 0
                 }
                 onClick={() =>
-                  run('POST /api/polls/create-poll', async () =>
+                  run('POST /api/polls/create-poll', () =>
                     createPoll(
                       question,
                       parsedOptions,
@@ -244,7 +358,7 @@ export default function Page() {
                 className="rounded-lg border px-4 py-2"
                 disabled={isPending || !Number.isFinite(parsedPollId)}
                 onClick={() =>
-                  run('PATCH /api/polls/edit-poll', async () =>
+                  run('PATCH /api/polls/edit-poll', () =>
                     editPoll(parsedPollId, {
                       question: question || undefined,
                       options:
@@ -303,7 +417,7 @@ export default function Page() {
                   !Number.isFinite(Number(month))
                 }
                 onClick={() =>
-                  run('GET /api/polls/by-month', async () =>
+                  run('GET /api/polls/by-month', () =>
                     getPollsByMonth(Number(year), Number(month)),
                   )
                 }
@@ -315,7 +429,7 @@ export default function Page() {
                 className="rounded-lg border px-4 py-2"
                 disabled={isPending}
                 onClick={() =>
-                  run('GET /api/polls/selectable-semesters', async () =>
+                  run('GET /api/polls/selectable-semesters', () =>
                     getSelectableSemesters(),
                   )
                 }
@@ -331,7 +445,7 @@ export default function Page() {
                   !Number.isFinite(Number(semester))
                 }
                 onClick={() =>
-                  run('GET /api/polls/by-semester', async () =>
+                  run('GET /api/polls/by-semester', () =>
                     getPollsBySemester(Number(year), Number(semester)),
                   )
                 }
@@ -341,6 +455,7 @@ export default function Page() {
             </div>
           </section>
 
+          {/*  3. Votes  */}
           <section className="rounded-xl border p-4">
             <Sans.T200 as="h2">3. Votes</Sans.T200>
 
@@ -349,9 +464,7 @@ export default function Page() {
                 className="rounded-lg border px-4 py-2"
                 disabled={isPending || !Number.isFinite(parsedPollId)}
                 onClick={() =>
-                  run('POST /api/votes/my-vote', async () =>
-                    getMyVote(parsedPollId),
-                  )
+                  run('POST /api/votes/my-vote', () => getMyVote(parsedPollId))
                 }
               >
                 내 투표 조회
@@ -361,7 +474,7 @@ export default function Page() {
                 className="rounded-lg border px-4 py-2"
                 disabled={isPending || !Number.isFinite(parsedPollId)}
                 onClick={() =>
-                  run('POST /api/votes/results', async () =>
+                  run('POST /api/votes/results', () =>
                     getVoteResults(parsedPollId),
                   )
                 }
@@ -402,9 +515,15 @@ export default function Page() {
               >
                 투표 수정
               </button>
+              <p className="mt-2 text-sm text-gray-500">
+                * 투표하기 / 수정은 API 명세상 PATCH이지만, 프론트엔드 편의상
+                POST로 구현되어 있습니다. * vote 버튼은 현재 로그인한 계정의
+                vote만 조회합니다. 대표자-대리인 통합 이력 조회가 아닙니다.
+              </p>
             </div>
           </section>
 
+          {/*  4. Admin  */}
           <section className="rounded-xl border p-4">
             <Sans.T200 as="h2">4. Admin</Sans.T200>
 
@@ -434,26 +553,35 @@ export default function Page() {
                 <input
                   type="checkbox"
                   checked={adminIsSubstitute}
-                  onChange={(e) => setAdminIsSubstitute(e.target.checked)}
+                  onChange={(e) => {
+                    setAdminIsSubstitute(e.target.checked);
+                    if (!e.target.checked) setAdminOriginalUserId('');
+                  }}
                 />
                 <Sans.T160 as="span">isSubstitute</Sans.T160>
               </label>
-
+              <input
+                className="rounded-lg border px-3 py-2 disabled:opacity-40"
+                placeholder="originalUserId (대리인인 경우 본계정 id, 본계정이면 빈칸)"
+                value={adminOriginalUserId}
+                disabled={!adminIsSubstitute}
+                onChange={(e) => setAdminOriginalUserId(e.target.value)}
+              />
               <input
                 className="rounded-lg border px-3 py-2"
-                placeholder="대상 userName"
+                placeholder="대상 userName (수정·삭제 시)"
                 value={targetUserName}
                 onChange={(e) => setTargetUserName(e.target.value)}
               />
               <input
                 className="rounded-lg border px-3 py-2"
-                placeholder="changeName"
+                placeholder="changeName (수정 시)"
                 value={changeName}
                 onChange={(e) => setChangeName(e.target.value)}
               />
               <input
                 className="rounded-lg border px-3 py-2"
-                placeholder="changePw"
+                placeholder="changePw (수정 시)"
                 value={changePw}
                 onChange={(e) => setChangePw(e.target.value)}
               />
@@ -462,18 +590,29 @@ export default function Page() {
             <div className="mt-4 flex flex-wrap gap-2">
               <button
                 className="rounded-lg border px-4 py-2"
+                disabled={isPending}
+                onClick={() => run('GET /api/admin/users', () => getUsers())}
+              >
+                유저 목록 조회
+              </button>
+
+              <button
+                className="rounded-lg border px-4 py-2"
                 disabled={
                   isPending ||
                   adminUsername.trim() === '' ||
-                  adminPassword.trim() === ''
+                  adminPassword.trim() === '' ||
+                  (adminIsSubstitute &&
+                    !Number.isFinite(Number(adminOriginalUserId.trim())))
                 }
                 onClick={() =>
-                  run('POST /api/admin/create-user', async () =>
+                  run('POST /api/admin/create-user', () =>
                     createUser(
                       adminUsername,
                       adminPassword,
                       adminIsAdmin,
                       adminIsSubstitute,
+                      parsedOriginalUserId,
                     ),
                   )
                 }
@@ -485,7 +624,7 @@ export default function Page() {
                 className="rounded-lg border px-4 py-2"
                 disabled={isPending || targetUserName.trim() === ''}
                 onClick={() =>
-                  run('PUT /api/admin/edit-user', async () =>
+                  run('PUT /api/admin/edit-user', () =>
                     editUser(targetUserName, {
                       changeName: changeName || undefined,
                       changePw: changePw || undefined,
@@ -500,7 +639,7 @@ export default function Page() {
                 className="rounded-lg border px-4 py-2"
                 disabled={isPending || targetUserName.trim() === ''}
                 onClick={() =>
-                  run('DELETE /api/admin/delete-user', async () =>
+                  run('DELETE /api/admin/delete-user', () =>
                     deleteUser(targetUserName),
                   )
                 }
@@ -509,8 +648,73 @@ export default function Page() {
               </button>
             </div>
           </section>
+
+          {/*  5. Admin Smoke Tests  */}
+          <section className="rounded-xl border p-4">
+            <Sans.T200 as="h2">5. Admin Smoke Tests</Sans.T200>
+            <Sans.T140
+              as="p"
+              className="mt-2"
+              color="title-label"
+            >
+              실제 백엔드 연결 상태에서 1차 완료 조건을 자동 검증합니다. Admin
+              섹션의 &quot;생성할 username / password&quot;를 입력한 뒤
+              실행하세요. smoke용 계정은 테스트 후 직접 삭제해주세요.
+            </Sans.T140>
+
+            <div className="mt-4">
+              <button
+                className="rounded-lg border px-4 py-2 font-medium disabled:opacity-40"
+                disabled={isSmokePending || isPending}
+                onClick={runSmokeTests}
+              >
+                {isSmokePending ? '실행 중...' : '🧪 Smoke Test 실행'}
+              </button>
+            </div>
+
+            {smokeResults.length > 0 && (
+              <div className="mt-4 grid gap-2">
+                {smokeResults.map((r) => (
+                  <div
+                    key={r.label}
+                    className="flex items-start gap-3 rounded-lg border px-4 py-3"
+                  >
+                    <span className="mt-0.5 text-base">
+                      {r.status === 'pass' ? '✅' : '❌'}
+                    </span>
+                    <div>
+                      <Sans.T140
+                        as="p"
+                        weight="semi-bold"
+                      >
+                        {r.label}
+                      </Sans.T140>
+                      {r.status === 'fail' && (
+                        <Sans.T140
+                          as="p"
+                          className="mt-1 text-red-500"
+                        >
+                          {r.detail}
+                        </Sans.T140>
+                      )}
+                    </div>
+                  </div>
+                ))}
+
+                <Sans.T140
+                  as="p"
+                  className="mt-1"
+                  color="title-subvalue"
+                >
+                  {smokeResults.filter((r) => r.status === 'pass').length} /{' '}
+                  {smokeResults.length} 통과
+                </Sans.T140>
+              </div>
+            )}
+          </section>
         </div>
 
+        {/*  결과 패널  */}
         <section className="rounded-xl border p-4">
           <Sans.T200 as="h2">{resultTitle}</Sans.T200>
 

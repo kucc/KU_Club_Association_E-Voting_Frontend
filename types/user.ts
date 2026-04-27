@@ -5,10 +5,11 @@ export type User = {
   created_at?: string;
   isAdmin: boolean;
   isSubstitute?: boolean;
+  original_user_id: number | null;
 };
 
 // UI용
-type UserRole = 'REPRESENTATIVE' | 'AGENT' | 'EXECUTIVE';
+export type UserRole = 'REPRESENTATIVE' | 'AGENT' | 'EXECUTIVE';
 
 export interface UserProfile {
   name: string;
