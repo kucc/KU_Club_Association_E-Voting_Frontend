@@ -2,6 +2,7 @@
 
 import { createMockPolls, createMockUser } from '@/app/lib/mocks';
 import { Sans } from '@/app/ui/sans';
+import { useCurrentUserQuery } from '@/hooks/queries/useAuthQuery';
 import { useTheme } from '@/providers/theme-provider';
 import type { Poll } from '@/types/poll';
 import type { UserProfile } from '@/types/user';
@@ -16,6 +17,7 @@ import HistoryCard from '@/components/common/history-card';
 import PollCard from '@/components/common/poll-card';
 
 export default function Home() {
+  const { data: authUser, isLoading, isError, error } = useCurrentUserQuery();
   const { setTheme } = useTheme();
   const [user, setUser] = useState<UserProfile | null>(null);
   const [votes, setVotes] = useState<Poll[] | null>(null);
@@ -45,7 +47,7 @@ export default function Home() {
     }
   }, [user, setTheme]);
 
-  if (!user || !votes) {
+  if (isLoading || !user || !votes) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
         <Sans.T240
@@ -55,6 +57,16 @@ export default function Home() {
           로딩 중...
         </Sans.T240>
       </div>
+    );
+  }
+
+  if (isError || !authUser) {
+    return (
+      <Sans.T240 as="p">
+        {error instanceof Error
+          ? error.message
+          : '사용자 정보를 불러오는 중 문제가 발생했습니다.'}
+      </Sans.T240>
     );
   }
 

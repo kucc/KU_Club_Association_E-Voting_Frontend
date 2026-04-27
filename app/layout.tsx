@@ -1,4 +1,5 @@
 import { Pretendard, notoSerifKR, roboto } from '@/app/ui/font';
+import { QueryProvider } from '@/providers/query-provider';
 import { ThemeProvider } from '@/providers/theme-provider';
 import type { Metadata, Viewport } from 'next';
 
@@ -28,11 +29,13 @@ export default function RootLayout({
       className={`${Pretendard.className} ${notoSerifKR.variable} ${roboto.variable} h-full antialiased`}
     >
       <body>
-        <ThemeProvider>
-          <div className="flex min-h-screen flex-col items-center bg-background">
-            <div className="w-screen max-w-[133vh]">{children}</div>
-          </div>
-        </ThemeProvider>
+        <QueryProvider>
+          <ThemeProvider>
+            <div className="flex min-h-screen flex-col items-center bg-background">
+              <div className="w-screen max-w-[133vh]">{children}</div>
+            </div>
+          </ThemeProvider>
+        </QueryProvider>
       </body>
     </html>
   );

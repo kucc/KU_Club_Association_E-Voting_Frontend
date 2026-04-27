@@ -1,5 +1,18 @@
 export type PollStatus = 'pending' | 'continuing' | 'completed';
 
+// API response
+export type PollResponse = {
+  id: number;
+  created_by: number;
+  question: string;
+  options: string[];
+  status: PollStatus;
+  started_at: string | null;
+  ended_at: string | null;
+  sort_order: number;
+};
+
+// UI용
 export interface PollStatistics {
   quota: number;
   votes: number;

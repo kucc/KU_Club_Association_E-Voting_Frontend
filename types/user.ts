@@ -1,4 +1,15 @@
-type UserRole = 'REPRESENTATIVE' | 'AGENT' | 'EXECUTIVE'; // REPRESENTATIVE = 대표자 | AGENT = 대리인 | EXECUTIVE = 전체 관리자
+// API response
+export type User = {
+  id: number;
+  username: string;
+  created_at?: string;
+  isAdmin: boolean;
+  isSubstitute?: boolean;
+  original_user_id: number | null;
+};
+
+// UI용
+export type UserRole = 'REPRESENTATIVE' | 'AGENT' | 'EXECUTIVE';
 
 export interface UserProfile {
   name: string;
