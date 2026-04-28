@@ -16,8 +16,26 @@ module.exports = {
   setupFilesAfterEnv: ['<rootDir>/test/setupTests.ts'],
 
   transform: {
-    '^.+\\.(t|j)sx?$': 'babel-jest',
-    '^.+\\.mjs$': 'babel-jest',
+    '^.+\\.(t|j)sx?$': [
+      'babel-jest',
+      {
+        presets: [
+          ['@babel/preset-env', { targets: { node: 'current' } }],
+          '@babel/preset-typescript',
+          ['@babel/preset-react', { runtime: 'automatic' }],
+        ],
+      },
+    ],
+    '^.+\\.mjs$': [
+      'babel-jest',
+      {
+        presets: [
+          ['@babel/preset-env', { targets: { node: 'current' } }],
+          '@babel/preset-typescript',
+          ['@babel/preset-react', { runtime: 'automatic' }],
+        ],
+      },
+    ],
   },
 
   transformIgnorePatterns: ['/node_modules/.pnpm/(?!(.*)/)'],
