@@ -1,21 +1,32 @@
 import { TypoProps, Typography } from './typography';
 
-const T200 = (props: TypoProps) => {
+const T400 = (props: TypoProps) => {
   const className = `font-sans ${props.className || ''}`;
 
   return (
-    <Typography.T200
+    <Typography.T400
       {...props}
       className={className}
     />
   );
 };
 
-const T180 = (props: TypoProps) => {
+const T240 = (props: TypoProps) => {
   const className = `font-sans ${props.className || ''}`;
 
   return (
-    <Typography.T180
+    <Typography.T240
+      {...props}
+      className={className}
+    />
+  );
+};
+
+const T200 = (props: TypoProps) => {
+  const className = `font-sans ${props.className || ''}`;
+
+  return (
+    <Typography.T200
       {...props}
       className={className}
     />
@@ -55,22 +66,11 @@ const T120 = (props: TypoProps) => {
   );
 };
 
-const T100 = (props: TypoProps) => {
-  const className = `font-sans ${props.className || ''}`;
-
-  return (
-    <Typography.T100
-      {...props}
-      className={className}
-    />
-  );
-};
-
 export const Sans = {
+  T400,
+  T240,
   T200,
-  T180,
   T160,
   T140,
   T120,
-  T100,
 };

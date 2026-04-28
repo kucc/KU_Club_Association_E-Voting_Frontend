@@ -1,59 +1,85 @@
-// TODO: 디자인 확정 후 글자 크기 변경
 import { HTMLAttributes } from 'react';
 
 type TextColor =
-  | 'high'
-  | 'medium'
-  | 'low'
-  | 'gold'
-  | 'black'
-  | 'primary'
-  | 'primary-accent';
+  | 'hero'
+  | 'popup'
+  | 'badge'
+  // heading
+  | 'heading-page'
+  | 'heading-page-light'
+  | 'heading-section'
+  // label
+  | 'label'
+  | 'label-click'
+  | 'label-unavailable'
+  | 'label-success'
+  | 'label-home'
+  | 'label-select'
+  | 'label-not-select'
+  // chip
+  | 'chip-on'
+  | 'chip-off'
+  // input
+  | 'input-placeholder'
+  | 'input-value'
+  // title
+  | 'title-card'
+  | 'title-value'
+  | 'title-subvalue'
+  | 'title-label'
+  // profile
+  | 'profile-name'
+  | 'profile-support'
+  | 'profile-value'
+  | 'profile-label';
+
+type TextWeight = 'medium' | 'semi-bold' | 'bold';
 
 export type TypoProps = Readonly<{
   children: React.ReactNode;
   as: 'h1' | 'h2' | 'h3' | 'p' | 'span';
   className?: HTMLAttributes<HTMLParagraphElement>['className'];
   color?: TextColor;
-  bold?: boolean;
+  weight?: TextWeight;
+  lineHeight?: string;
+  letterSpacing?: string;
 }>;
 
-function Base({ children, as: Tag, color, bold, className }: TypoProps) {
-  let colorClass = '';
-  switch (color) {
-    case 'high':
-      colorClass = 'text-arcana-text-high';
-      break;
+function Base({
+  children,
+  as: Tag,
+  className,
+  color,
+  weight = 'medium',
+  lineHeight = '100%',
+  letterSpacing = '0',
+}: TypoProps) {
+  const colorClass = color ? `text-text-${color}` : 'text-inherit';
+
+  let weightClass = '';
+  switch (weight) {
     case 'medium':
-      colorClass = 'text-arcana-text-medium';
+      weightClass = 'font-medium';
       break;
-    case 'low':
-      colorClass = 'text-arcana-text-low';
+    case 'semi-bold':
+      weightClass = 'font-semibold';
       break;
-    case 'gold':
-      colorClass = 'text-arcana-gold';
-      break;
-    case 'black':
-      colorClass = 'text-arcana-text-black';
-      break;
-    case 'primary':
-      colorClass = 'text-arcana-primary';
-      break;
-    case 'primary-accent':
-      colorClass = 'text-arcana-primary-accent';
+    case 'bold':
+      weightClass = 'font-bold';
       break;
     default:
-      colorClass = 'text-inherit';
+      weightClass = 'font-normal';
       break;
   }
 
-  const _className = `${colorClass || ''} ${className || ''} whitespace-pre-wrap`;
+  const _className = `${colorClass} ${weightClass} ${className || ''} whitespace-pre-wrap`;
 
   return (
     <Tag
       className={_className}
       style={{
-        fontWeight: bold ? 'bold' : 'normal',
+        lineHeight: lineHeight,
+        letterSpacing: letterSpacing,
       }}
     >
       {children}
@@ -61,8 +87,8 @@ function Base({ children, as: Tag, color, bold, className }: TypoProps) {
   );
 }
 
-const T200 = (props: TypoProps) => {
-  const className = `text-[20px] ${props.className || ''}`;
+const T400 = (props: TypoProps) => {
+  const className = `text-[40px] ${props.className || ''}`;
 
   return (
     <Base
@@ -72,8 +98,19 @@ const T200 = (props: TypoProps) => {
   );
 };
 
-const T180 = (props: TypoProps) => {
-  const className = `text-[18px] ${props.className || ''}`;
+const T240 = (props: TypoProps) => {
+  const className = `text-[24px] ${props.className || ''}`;
+
+  return (
+    <Base
+      {...props}
+      className={className}
+    />
+  );
+};
+
+const T200 = (props: TypoProps) => {
+  const className = `text-[20px] ${props.className || ''}`;
 
   return (
     <Base
@@ -116,22 +153,11 @@ const T120 = (props: TypoProps) => {
   );
 };
 
-const T100 = (props: TypoProps) => {
-  const className = `text-[10px] ${props.className || ''}`;
-
-  return (
-    <Base
-      {...props}
-      className={className}
-    />
-  );
-};
-
 export const Typography = {
+  T400,
+  T240,
   T200,
-  T180,
   T160,
   T140,
   T120,
-  T100,
 };
