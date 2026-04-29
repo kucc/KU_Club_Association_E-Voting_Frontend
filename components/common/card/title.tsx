@@ -3,9 +3,11 @@ import { Sans } from '@/app/ui/sans';
 type Props = Readonly<{
   content: string;
   isAgent?: boolean;
+  badgeLabel?: string;
 }>;
 
-export default function Title({ content, isAgent }: Props) {
+export default function Title({ content, isAgent, badgeLabel }: Props) {
+  const displayedBadgeLabel = badgeLabel ?? (isAgent ? '대리인' : undefined);
   return (
     <div className="flex justify-between">
       <Sans.T200
@@ -16,7 +18,7 @@ export default function Title({ content, isAgent }: Props) {
       >
         {content}
       </Sans.T200>
-      {isAgent && (
+      {displayedBadgeLabel && (
         <div className="h-5.25 rounded-[4px] bg-badge px-1.5 py-0.5">
           <Sans.T120
             as="p"
@@ -24,7 +26,7 @@ export default function Title({ content, isAgent }: Props) {
             letterSpacing="-0.1px"
             color="badge"
           >
-            대리인
+            {displayedBadgeLabel}
           </Sans.T120>
         </div>
       )}
