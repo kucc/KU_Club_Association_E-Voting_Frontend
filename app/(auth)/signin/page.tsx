@@ -2,6 +2,8 @@
 
 import { Sans } from '@/app/ui/sans';
 import { useSignInMutation } from '@/hooks/queries/useAuthQuery';
+import { useTheme } from '@/providers/theme-provider';
+import { User } from '@/types/user';
 
 import { useRouter } from 'next/navigation';
 
@@ -13,6 +15,20 @@ import Input from './_components/input';
 export default function Page() {
   const router = useRouter();
   const { mutate, isPending, error } = useSignInMutation();
+
+  const { setTheme } = useTheme();
+
+  const onSuccess = (user: User) => {
+    if (user.isAdmin) {
+      setTheme('theme-executive');
+    }
+
+    if (user.isSubstitute) {
+      setTheme('theme-agent');
+    }
+
+    router.push('/');
+  };
 
   return (
     <div className="flex h-screen w-full items-center justify-center px-5">
@@ -26,7 +42,7 @@ export default function Page() {
                   username: formData.get('username') as string,
                   password: formData.get('password') as string,
                 },
-                { onSuccess: () => router.push('/') },
+                { onSuccess },
               );
             }}
           >
