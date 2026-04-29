@@ -97,6 +97,7 @@ export default function Page() {
           <Button
             content="로그인하기"
             disabled={!canSubmit || isPending}
+            submit
           />
         </div>
       </form>

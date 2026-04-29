@@ -179,6 +179,7 @@ export default function Home() {
               {ongoingVotes.map((vote) => (
                 <PollCard
                   key={vote.id}
+                  id={vote.id}
                   title={vote.question}
                   deadline={vote.ended_at || ''}
                   statistics={{

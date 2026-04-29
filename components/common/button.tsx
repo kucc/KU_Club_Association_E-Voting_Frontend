@@ -1,15 +1,33 @@
+'use client';
 import { Sans } from '@/app/ui/sans';
+
+import { cn } from '@/lib/utils';
 
 type Props = Readonly<{
   content: string;
   disabled?: boolean;
+  onClick?: () => void;
+  size?: 'small' | 'medium';
   bigText?: boolean;
+  submit?: boolean;
 }>;
 
-export default function Button({ content, disabled, bigText }: Props) {
+export default function Button({
+  content,
+  disabled,
+  onClick,
+  size = 'small',
+  bigText,
+  submit,
+}: Props) {
   return (
     <button
-      className="w-full cursor-pointer rounded-[10px] bg-label py-3 transition-all duration-300 disabled:cursor-not-allowed disabled:bg-label-unavailable"
+      type={submit ? 'submit' : 'button'}
+      onClick={onClick}
+      className={cn(
+        'flex w-full cursor-pointer items-center justify-center rounded-[10px] bg-label transition-all duration-300 disabled:cursor-not-allowed disabled:bg-label-unavailable',
+        size === 'medium' ? 'h-[46px]' : 'h-11',
+      )}
       disabled={disabled}
     >
       {bigText ? (
