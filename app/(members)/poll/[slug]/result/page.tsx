@@ -2,6 +2,7 @@
 
 import { getAdminPositionById } from '@/app/(members)/_data/user-directory';
 import {
+  getEligibleVoterCount,
   getThemeByUserProfile,
   toUserProfile,
 } from '@/app/(members)/_utils/poll-display';
@@ -123,7 +124,10 @@ export default function Page() {
     isError: isPollError,
     error: pollError,
   } = usePollResultsQuery(pollId);
-  const { data: myVote, isLoading: isMyVoteLoading } = useMyVoteQuery(pollId);
+  const { data: myVote, isLoading: isMyVoteLoading } = useMyVoteQuery(
+    pollId,
+    authUser?.id,
+  );
 
   const userProfile = useMemo(() => {
     return authUser ? toUserProfile(authUser) : null;
@@ -178,7 +182,11 @@ export default function Page() {
   const pollDescription = getOptionalPollText(poll, 'description');
   const pollProposer = getOptionalPollText(poll, 'proposer');
   const totalVotes = results.reduce((total, result) => total + result.count, 0);
-  const turnoutPercentage = totalVotes > 0 ? 100 : 0;
+  const eligibleVoterCount = getEligibleVoterCount();
+  const turnoutPercentage =
+    eligibleVoterCount > 0
+      ? Math.round((totalVotes / eligibleVoterCount) * 100)
+      : 0;
   const resultCountByOption = new Map(
     results.map((result) => [result.selected, result.count]),
   );
@@ -197,7 +205,7 @@ export default function Page() {
 
   return (
     <main className="min-h-screen bg-background">
-      <div className="pt-4">
+      <div className="pt-15.5">
         <header className="flex h-11 items-center gap-4 px-5">
           <button
             type="button"
@@ -251,7 +259,7 @@ export default function Page() {
               <Label
                 name="투표 현황"
                 content={`${totalVotes} `}
-                subContent={`/ ${totalVotes} (${turnoutPercentage}%)`}
+                subContent={`/ ${eligibleVoterCount} (${turnoutPercentage}%)`}
               />
             </div>
 

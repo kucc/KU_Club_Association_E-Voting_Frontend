@@ -116,7 +116,10 @@ export default function Page() {
   const { data: authUser, isLoading: isAuthLoading } = useCurrentUserQuery();
   const { data: pollResult, isLoading: isPollLoading } =
     usePollResultsQuery(pollId);
-  const { data: myVote, isLoading: isMyVoteLoading } = useMyVoteQuery(pollId);
+  const { data: myVote, isLoading: isMyVoteLoading } = useMyVoteQuery(
+    pollId,
+    authUser?.id,
+  );
   const castVoteMutation = useCastVoteMutation(pollId);
   const editVoteMutation = useEditVoteMutation(pollId);
 
@@ -195,17 +198,22 @@ export default function Page() {
       setIsSubmittedState(true);
       setShowSuccessModal(true);
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : '';
+      const normalizedErrorMessage = errorMessage.toLowerCase();
       const isSubstituteVoteError =
-        error instanceof Error &&
-        (error.message.includes('Counterpart account') ||
-          error.message.toLowerCase().includes('poll is not available'));
+        normalizedErrorMessage.includes('counterpart account') ||
+        normalizedErrorMessage.includes('poll is not available') ||
+        normalizedErrorMessage.includes('already voted') ||
+        normalizedErrorMessage.includes('already cast') ||
+        errorMessage.includes('본계정') ||
+        errorMessage.includes('대리인');
       const message = isSubstituteVoteError
         ? isCurrentUserSubstitute
           ? '대표자 계정으로 투표 완료'
           : '대리인 계정으로 투표 완료'
-        : error instanceof Error
-          ? error.message
-          : '투표 처리 중 문제가 발생했습니다';
+        : normalizedErrorMessage.includes('vote not found')
+          ? '현재 계정의 기존 투표 내역을 찾지 못했습니다. 다시 접속한 뒤 투표해주세요.'
+          : errorMessage || '투표 처리 중 문제가 발생했습니다';
 
       setSubmitErrorMessage(message);
       setShowSuccessModal(true);
@@ -240,7 +248,7 @@ export default function Page() {
 
   return (
     <main className="min-h-screen bg-background">
-      <div className="pt-4">
+      <div className="pt-15.5">
         <header className="flex h-11 items-center gap-4 px-5">
           <button
             type="button"
