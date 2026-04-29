@@ -96,7 +96,8 @@ export default function AdminPollCreatePage() {
 
             <div className="flex flex-col gap-2">
               <textarea
-                placeholder="투표 설명을 작성하세요 (최대 500자)"
+                placeholder="투표 설명을 작성하세요 (최대 500자)
+                ※ 현재 설명 저장은 지원되지 않습니다."
                 value={description}
                 onChange={(e) =>
                   setDescription(e.target.value.slice(0, MAX_LENGTH))
