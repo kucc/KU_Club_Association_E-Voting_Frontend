@@ -1,6 +1,7 @@
 'use client';
 
 import { Sans } from '@/app/ui/sans';
+import { useCreatePollMutation } from '@/hooks/queries/usePollQuery';
 
 import { useState } from 'react';
 
@@ -12,11 +13,36 @@ import { cn } from '@/lib/utils';
 export default function AdminPollCreatePage() {
   const router = useRouter();
 
+  const { mutateAsync: createPoll, isPending } = useCreatePollMutation();
+
+  // [상태] 입력값 관리
   const [question, setQuestion] = useState('');
   const [description, setDescription] = useState('');
   const [endedAt, setEndedAt] = useState('');
 
   const MAX_LENGTH = 500;
+
+  const handleCreate = async () => {
+    if (!question || !description || !endedAt) {
+      alert('모든 항목을 입력해주세요!');
+      return;
+    }
+
+    try {
+      await createPoll({
+        question, // 제목
+        options: ['찬성', '반대'], // 우선 기본값 (나중에 UI 추가 가능)
+        sort_order: 1, // 정렬 순서
+        ended_at: new Date(endedAt).toISOString(),
+      });
+
+      alert('투표가 성공적으로 생성되었습니다! 목록 페이지로 이동합니다.');
+      router.push('/dashboard/poll'); // 성공 시 목록 페이지로 이동
+    } catch (error) {
+      console.error('생성 실패:', error);
+      alert('투표 생성에 실패했습니다. 권한이나 서버 상태를 확인해주세요.');
+    }
+  };
 
   return (
     <main className="theme-executive flex min-h-screen justify-center bg-[#303030] font-['Pretendard']">
@@ -45,7 +71,7 @@ export default function AdminPollCreatePage() {
 
         {/* --- 스크롤 가능한 메인 영역 --- */}
         <div className="scrollbar-hide flex flex-1 flex-col gap-[32px] overflow-y-auto px-[20px] py-[24px]">
-          {/* 1. 제목 및 설명 입력 */}
+          {/* 1. 제목 및 설명 입력 (정석 키값: question) */}
           <div className="flex shrink-0 flex-col gap-[24px]">
             <input
               type="text"
@@ -65,6 +91,7 @@ export default function AdminPollCreatePage() {
                 className="h-[250px] w-full resize-none border-none bg-transparent text-[14px] leading-[20px] font-normal text-[#FFFFFF] outline-none placeholder:text-[#52514E]"
               />
 
+              {/* 실시간 카운터 */}
               <div className="flex h-[17px] w-full items-center justify-end gap-[2px]">
                 <span
                   className={cn(
@@ -83,7 +110,7 @@ export default function AdminPollCreatePage() {
             </div>
           </div>
 
-          {/* 2. 종료 기한 설정  */}
+          {/* 2. 종료 기한 설정 (피그마 미비점 보완) */}
           <div className="flex shrink-0 flex-col gap-3">
             <Sans.T140
               as="p"
@@ -106,9 +133,8 @@ export default function AdminPollCreatePage() {
                 투표 작성 전 주의사항
               </p>
               <p className="m-0 text-[14px] leading-[20px] font-medium whitespace-pre-line text-[#A9ABAD]">
-                어쩌고저쩌고한 글은 안 됩니다 <br />
-                어쩌고저쩌고 하게 쓰게요 <br /> 뭐뭐뭐에 위반되는 건
-                어쩌고저쩌고 <br /> 윤리 뭐시기
+                공정한 투표 문화를 위해 내용을 신중히 작성해주세요. <br />
+                부적절한 내용 포함 시 관리자에 의해 삭제될 수 있습니다.
               </p>
             </div>
           </div>
@@ -124,10 +150,11 @@ export default function AdminPollCreatePage() {
           </button>
           <button
             type="button"
-            disabled={!question || !description}
+            disabled={!question || !description || !endedAt || isPending}
+            onClick={handleCreate}
             className="flex h-[46px] flex-1 items-center justify-center rounded-[8px] bg-[#A0191E] text-[16px] font-semibold text-[#FFFFFF] transition-transform active:scale-95 disabled:opacity-30"
           >
-            작성 완료
+            {isPending ? '처리 중...' : '작성 완료'}
           </button>
         </div>
       </div>
