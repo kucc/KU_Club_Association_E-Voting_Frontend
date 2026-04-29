@@ -1,7 +1,11 @@
 'use client';
 
 import { Sans } from '@/app/ui/sans';
-import { usePollResultsQuery } from '@/hooks/queries/usePollQuery';
+import {
+  useEndPollMutation,
+  usePollResultsQuery,
+  useStartPollMutation,
+} from '@/hooks/queries/usePollQuery';
 import { useTheme } from '@/providers/theme-provider';
 
 import { use, useEffect } from 'react';
@@ -29,7 +33,10 @@ export default function AdminPollDetailPage({
   const router = useRouter();
   const { setTheme } = useTheme();
 
+  // 1. 데이터 조회 및 액션(시작/종료) Mutation 설정
   const { data, isPending, error } = usePollResultsQuery(Number(params.id));
+  const { mutate: startPoll, isPending: isStarting } = useStartPollMutation();
+  const { mutate: endPoll, isPending: isEnding } = useEndPollMutation();
 
   useEffect(() => {
     setTheme('theme-executive');
@@ -53,6 +60,28 @@ export default function AdminPollDetailPage({
   );
   const turnoutPercentage = Math.round((votedCount / totalVoters) * 100);
   const maxCount = Math.max(...results.map((r: PollResultItem) => r.count));
+
+  //  투표 시작 핸들러
+  const handleStartPoll = () => {
+    if (confirm('투표를 시작하시겠습니까? 시작 즉시 회원들에게 공개됩니다.')) {
+      startPoll(Number(params.id), {
+        onSuccess: () => alert('투표가 시작되었습니다!'),
+      });
+    }
+  };
+
+  //  투표 종료 핸들러
+  const handleEndPoll = () => {
+    if (
+      confirm(
+        '이 투표를 지금 종료하시겠습니까?\n종료 후에는 더 이상 투표를 받을 수 없습니다.',
+      )
+    ) {
+      endPoll(Number(params.id), {
+        onSuccess: () => alert('투표가 종료되었습니다.'),
+      });
+    }
+  };
 
   return (
     <main className="theme-executive min-h-screen bg-[#303030] pb-20 font-['Pretendard']">
@@ -87,12 +116,20 @@ export default function AdminPollDetailPage({
               <div className="flex flex-col gap-3">
                 <Label
                   name="마감 기한"
-                  content={`${formatDate(poll.ended_at ?? '')}에 종료`}
+                  content={
+                    poll.ended_at
+                      ? `${formatDate(poll.ended_at)}에 종료`
+                      : '기한 없음'
+                  }
                 />
                 <Label
                   name="상태"
                   content={
-                    poll.status === 'continuing' ? '진행 중' : '대기/종료'
+                    poll.status === 'pending'
+                      ? '대기 중'
+                      : poll.status === 'continuing'
+                        ? '진행 중'
+                        : '종료됨'
                   }
                 />
                 <Label
@@ -158,17 +195,49 @@ export default function AdminPollDetailPage({
               </div>
 
               <div className="flex w-full gap-[8px]">
-                <button className="h-[44px] flex-1 rounded-[10px] bg-[#848485] font-semibold text-[#FFFFFF]">
-                  종료하기
-                </button>
-                <button
-                  onClick={() =>
-                    router.push(`/dashboard/poll/${params.id}/edit`)
-                  }
-                  className="h-[44px] flex-[2.5] rounded-[10px] bg-[#A0191E] font-semibold text-[#FFFFFF]"
-                >
-                  수정하기
-                </button>
+                {/* 1. 대기 중일 때는 [시작하기] */}
+                {poll.status === 'pending' && (
+                  <button
+                    onClick={handleStartPoll}
+                    disabled={isStarting}
+                    className="h-[44px] flex-1 rounded-[10px] bg-[#28A745] font-semibold text-[#FFFFFF] disabled:opacity-50"
+                  >
+                    {isStarting ? '시작 중...' : '시작하기'}
+                  </button>
+                )}
+
+                {/* 2. 진행 중일 때는 [종료하기] */}
+                {poll.status === 'continuing' && (
+                  <button
+                    onClick={handleEndPoll}
+                    disabled={isEnding}
+                    className="h-[44px] flex-1 rounded-[10px] bg-[#848485] font-semibold text-[#FFFFFF] disabled:opacity-50"
+                  >
+                    {isEnding ? '종료 중...' : '종료하기'}
+                  </button>
+                )}
+
+                {/* 3. 종료되지 않은 경우에만 [수정하기] 노출 */}
+                {poll.status !== 'completed' && (
+                  <button
+                    onClick={() =>
+                      router.push(`/dashboard/poll/${params.id}/edit`)
+                    }
+                    className="h-[44px] flex-[2.5] rounded-[10px] bg-[#A0191E] font-semibold text-[#FFFFFF]"
+                  >
+                    수정하기
+                  </button>
+                )}
+
+                {/* 4. 종료된 경우 목록으로 돌아가는 버튼 (선택사항) */}
+                {poll.status === 'completed' && (
+                  <button
+                    onClick={() => router.push('/dashboard/poll')}
+                    className="h-[44px] flex-1 rounded-[10px] bg-[#52514E] font-semibold text-[#FFFFFF]"
+                  >
+                    목록으로
+                  </button>
+                )}
               </div>
             </div>
           </Card>
