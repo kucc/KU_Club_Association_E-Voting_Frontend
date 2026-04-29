@@ -1,8 +1,14 @@
 'use client';
 
 import { Sans } from '@/app/ui/sans';
-import { useCurrentUserQuery } from '@/hooks/queries/useAuthQuery';
+import {
+  useCurrentUserQuery,
+  useSignOutMutation,
+} from '@/hooks/queries/useAuthQuery';
 import { usePollsQuery } from '@/hooks/queries/usePollQuery';
+import { useTheme } from '@/providers/theme-provider';
+
+import { useEffect } from 'react';
 
 import Image from 'next/image';
 import Link from 'next/link';
@@ -14,7 +20,10 @@ export default function Home() {
   const { data, isSuccess } = useCurrentUserQuery();
   const polls = usePollsQuery();
 
-  const isManager = false;
+  const { setTheme } = useTheme();
+  const { mutate: _signOut } = useSignOutMutation();
+
+  const isManager = isSuccess && data?.isAdmin;
 
   const ongoingVotes = (polls.data || []).filter(
     (v) => v.status === 'continuing',
@@ -23,34 +32,50 @@ export default function Home() {
     (v) => v.status === 'pending',
   );
 
+  const signOut = () => {
+    setTheme('theme-default');
+    _signOut();
+  };
+
+  useEffect(() => {
+    if (!isSuccess) return;
+
+    if (isManager) setTheme('theme-executive');
+  }, [isSuccess, isManager, setTheme]);
+
   return (
     <div className="min-h-screen bg-background pb-20">
       <section
-        className={`relative flex ${
-          !isSuccess ? 'h-188' : isManager ? 'h-150.5' : 'h-131.5'
-        } w-full flex-col rounded-b-[20px] ${
-          isManager ? 'bg-[#FFDCDE]' : 'bg-hero-card'
-        } shadow-[0_0_60px_rgba(0,0,0,0.04)] transition-all duration-300`}
+        className={`flex ${
+          !isSuccess ? 'h-188' : 'h-131.5'
+        } w-full flex-col rounded-b-[20px] bg-hero-card pt-15.5 shadow-[0_0_60px_rgba(0,0,0,0.04)] transition-all duration-300`}
       >
         {isSuccess ? (
-          <div className="absolute top-15.5 flex h-11 w-full items-center justify-between px-5">
+          <div className="flex h-11 w-full items-center justify-between px-5">
             <Image
               src="/icons/logo_poll.svg"
               alt="logo"
               width={28}
               height={28}
-              className={isManager ? '' : 'brightness-0 invert'}
+              className={
+                isManager
+                  ? 'cursor-pointer'
+                  : 'cursor-pointer brightness-0 invert'
+              }
+              onClick={() => signOut()}
             />
-            <Image
-              src="/icons/profile.svg"
-              alt="profile"
-              width={28}
-              height={28}
-              className={isManager ? '' : 'brightness-0 invert'}
-            />
+            <Link href="/board">
+              <Image
+                src="/icons/profile.svg"
+                alt="profile"
+                width={28}
+                height={28}
+                className={isManager ? '' : 'brightness-0 invert'}
+              />
+            </Link>
           </div>
         ) : (
-          <div className="absolute top-15.5 left-1/2 -translate-x-1/2">
+          <div className="flex w-full justify-center">
             <Image
               src="/icons/logo_poll.svg"
               alt="logo"
@@ -63,16 +88,16 @@ export default function Home() {
 
         {/* 타이틀 및 문구 영역 */}
         <div
-          className={`absolute top-1/2 -translate-y-1/2 ${
+          className={`${
             isSuccess && !isManager ? 'mt-14.5' : ''
-          } flex w-full flex-col items-start justify-center gap-2.5 px-5 py-2.5`}
+          } mt-45 flex w-full flex-col items-start justify-center gap-2.5 px-5 py-2.5`}
         >
           <Sans.T400
             as="h1"
             weight="bold"
-            color={isManager ? 'label-home' : 'hero'}
+            color="hero"
           >
-            <span className="block leading-[48px] tracking-[-1px]">
+            <span className="block leading-12 tracking-[-1px]">
               {'고려대학교\n동아리연합회\n온라인투표시스템'}
             </span>
           </Sans.T400>
@@ -82,14 +107,14 @@ export default function Home() {
               <Sans.T200
                 as="span"
                 weight="bold"
-                color={isManager ? 'label-home' : 'hero'}
+                color="hero"
               >
                 {data?.username}
               </Sans.T200>
               <Sans.T200
                 as="span"
                 weight="medium"
-                color={isManager ? 'label-home' : 'hero'}
+                color="hero"
               >
                 님 환영합니다
               </Sans.T200>
@@ -100,36 +125,31 @@ export default function Home() {
               weight="medium"
               color="hero"
             >
-              © KUCC
+              KUVOTE © KUCC
             </Sans.T200>
           )}
         </div>
 
         {/* 관리자 바로가기 버튼 */}
-        {isManager && (
+        {/* {isManager && (
           <div className="absolute bottom-6 w-full px-5">
             <Link
               href="/admin"
               className="w-full"
             >
-              <button className="flex h-13 w-full items-center justify-center rounded-[10px] bg-[#A0191E] transition-transform active:scale-[0.98]">
-                <Sans.T200
-                  as="span"
-                  weight="semi-bold"
-                  className="text-white"
-                >
-                  관리자 모드 바로가기
-                </Sans.T200>
-              </button>
+              <Button
+                content="관리자 모드 바로가기"
+                bigText
+              ></Button>
             </Link>
           </div>
-        )}
+        )} */}
 
         {/* 로그인 전 버튼 */}
         {!isSuccess && (
-          <div className="absolute top-170 w-full px-5">
+          <div className="mt-51.25 w-full px-5">
             <Link href="/signin">
-              <button className="flex h-13 w-full items-center justify-center rounded-[10px] bg-label-home transition-transform active:scale-[0.98]">
+              <button className="flex h-13 w-full cursor-pointer items-center justify-center rounded-[10px] bg-label-home transition-transform active:scale-[0.98]">
                 <Sans.T200
                   as="span"
                   weight="semi-bold"
@@ -159,6 +179,7 @@ export default function Home() {
               {ongoingVotes.map((vote) => (
                 <PollCard
                   key={vote.id}
+                  id={vote.id}
                   title={vote.question}
                   deadline={vote.ended_at || ''}
                   statistics={{

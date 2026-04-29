@@ -1,4 +1,7 @@
+'use client';
 import { PollStatistics } from '@/types/poll';
+
+import { useRouter } from 'next/navigation';
 
 import { formatDate } from '@/lib/utils';
 
@@ -8,6 +11,7 @@ import Labels, { LabelType } from './card/labels';
 import Title from './card/title';
 
 type Props = Readonly<{
+  id?: number;
   title: string;
   deadline: string; // ISO 8601
   statistics: PollStatistics;
@@ -27,6 +31,7 @@ export default function PollCard({
   isAdmin,
   isAgent,
   onAction,
+  id,
 }: Props) {
   const votingRate =
     statistics.quota > 0
@@ -45,6 +50,7 @@ export default function PollCard({
         : undefined,
     },
   ];
+  const router = useRouter();
 
   if (myVote) {
     labels[1].content = `${statistics.votes} `;
@@ -67,7 +73,11 @@ export default function PollCard({
 
       <Button
         content={isAdmin ? '상세보기' : myVote ? '투표 수정하기' : '투표하기'}
-        onClick={onAction}
+        onClick={() => {
+          if (onAction) onAction();
+
+          router.push(isAdmin ? `/dashboard/poll/${id}` : `/poll/${id}`);
+        }}
       />
     </Card>
   );

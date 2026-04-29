@@ -17,7 +17,7 @@ export default function ProfileHeader({ user, onBack }: Props) {
             type="button"
             aria-label="홈으로 이동"
             onClick={onBack}
-            className="flex size-6 items-center justify-center"
+            className="flex size-6 cursor-pointer items-center justify-center"
           >
             <Image
               src="/icons/back.svg"

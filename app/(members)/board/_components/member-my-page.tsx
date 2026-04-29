@@ -1,3 +1,5 @@
+'use client';
+
 import { Sans } from '@/app/ui/sans';
 import type { UserProfile } from '@/types/user';
 
