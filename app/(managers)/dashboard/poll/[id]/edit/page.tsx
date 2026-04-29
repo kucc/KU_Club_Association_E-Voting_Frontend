@@ -28,15 +28,13 @@ export default function AdminPollEditPage({
   const [description, setDescription] = useState('');
   const [endedAt, setEndedAt] = useState('');
 
-  // 2. 데이터 로드 시 상태값 채워넣기 (Plan B 파싱 포함)
+  // 2. 데이터 로드 시 상태값 채워넣기
   useEffect(() => {
     if (data?.poll) {
       const fullQuestion = data.poll.question;
-      const parts = fullQuestion.split('\n\n');
 
       /* eslint-disable react-hooks/set-state-in-effect */
-      setQuestion(parts[0]);
-      setDescription(parts[1] || '');
+      setQuestion(fullQuestion);
 
       if (data.poll.ended_at) {
         // datetime-local input 형식에 맞게 변환 (YYYY-MM-DDTHH:mm)
@@ -133,7 +131,7 @@ export default function AdminPollEditPage({
               type="datetime-local"
               className="h-11 w-full rounded-lg bg-[#52514E] px-4 text-[14px] [color-scheme:dark] opacity-50 outline-none"
               value={endedAt}
-              readOnly // 현재 시스템상 마감 기한 수정은 지원되지 않으므로 읽기 전용으로 설정
+              readOnly
             />
             <p className="text-[12px] text-[#848485]">
               ※ 현재 시스템상 마감 기한 수정은 지원되지 않습니다.

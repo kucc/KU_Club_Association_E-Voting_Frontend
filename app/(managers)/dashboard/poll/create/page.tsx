@@ -126,7 +126,7 @@ export default function AdminPollCreatePage() {
             </div>
           </div>
 
-          {/* 2. 종료 기한 설정 (피그마 미비점 보완) */}
+          {/* 2. 종료 기한 설정 */}
 
           <div className="flex shrink-0 flex-col gap-3">
             <Sans.T140
