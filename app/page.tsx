@@ -1,7 +1,10 @@
 'use client';
 
 import { Sans } from '@/app/ui/sans';
-import { useCurrentUserQuery } from '@/hooks/queries/useAuthQuery';
+import {
+  useCurrentUserQuery,
+  useSignOutMutation,
+} from '@/hooks/queries/useAuthQuery';
 import { usePollsQuery } from '@/hooks/queries/usePollQuery';
 import { useTheme } from '@/providers/theme-provider';
 
@@ -18,6 +21,7 @@ export default function Home() {
   const polls = usePollsQuery();
 
   const { setTheme } = useTheme();
+  const { mutate: signOut } = useSignOutMutation();
 
   const isManager = isSuccess && data?.isAdmin;
 
@@ -48,7 +52,12 @@ export default function Home() {
               alt="logo"
               width={28}
               height={28}
-              className={isManager ? '' : 'brightness-0 invert'}
+              className={
+                isManager
+                  ? 'cursor-pointer'
+                  : 'cursor-pointer brightness-0 invert'
+              }
+              onClick={() => signOut()}
             />
             <Link href="/board">
               <Image

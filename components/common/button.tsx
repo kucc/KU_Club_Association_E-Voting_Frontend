@@ -9,7 +9,7 @@ type Props = Readonly<{
 export default function Button({ content, disabled, bigText }: Props) {
   return (
     <button
-      className="w-full cursor-pointer rounded-[10px] bg-label py-3 disabled:cursor-not-allowed disabled:bg-label-unavailable"
+      className="w-full cursor-pointer rounded-[10px] bg-label py-3 transition-all duration-300 disabled:cursor-not-allowed disabled:bg-label-unavailable"
       disabled={disabled}
     >
       {bigText ? (
