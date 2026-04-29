@@ -61,7 +61,7 @@ export default function Home() {
             </Link>
           </div>
         ) : (
-          <div className="">
+          <div className="flex w-full justify-center">
             <Image
               src="/icons/logo_poll.svg"
               alt="logo"
@@ -76,7 +76,7 @@ export default function Home() {
         <div
           className={`${
             isSuccess && !isManager ? 'mt-14.5' : ''
-          } mt-29 flex w-full flex-col items-start justify-center gap-2.5 px-5 py-2.5`}
+          } mt-45 flex w-full flex-col items-start justify-center gap-2.5 px-5 py-2.5`}
         >
           <Sans.T400
             as="h1"
@@ -111,7 +111,7 @@ export default function Home() {
               weight="medium"
               color="hero"
             >
-              © KUCC
+              KUVOTE © KUCC
             </Sans.T200>
           )}
         </div>
@@ -133,9 +133,9 @@ export default function Home() {
 
         {/* 로그인 전 버튼 */}
         {!isSuccess && (
-          <div className="absolute top-170 w-full px-5">
+          <div className="mt-51.25 w-full px-5">
             <Link href="/signin">
-              <button className="flex h-13 w-full items-center justify-center rounded-[10px] bg-label-home transition-transform active:scale-[0.98]">
+              <button className="flex h-13 w-full cursor-pointer items-center justify-center rounded-[10px] bg-label-home transition-transform active:scale-[0.98]">
                 <Sans.T200
                   as="span"
                   weight="semi-bold"
