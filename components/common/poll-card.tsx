@@ -44,7 +44,7 @@ export default function PollCard({
     },
     {
       name: '투표 현황',
-      content: isAdmin ? `${statistics.votes} ` : '투표하고 확인',
+      content: isAdmin ? `${statistics.votes} ` : '투표 후 확인',
       subContent: isAdmin
         ? `/ ${statistics.quota} (${votingRate}%)`
         : undefined,
