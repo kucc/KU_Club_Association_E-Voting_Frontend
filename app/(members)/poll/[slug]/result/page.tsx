@@ -1,6 +1,8 @@
 'use client';
 
+import { getAdminAccountByUsername } from '@/app/(members)/_data/user-directory';
 import { Sans } from '@/app/ui/sans';
+import { useCurrentUserQuery } from '@/hooks/queries/useAuthQuery';
 
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -76,9 +78,9 @@ function ResultOptionItem({ option, checked }: ResultOptionItemProps) {
       />
 
       <div className="absolute inset-0 flex h-11 w-full items-center gap-2 px-4 py-3">
-        <span className="relative block size-3 shrink-0">
-          {checked ? (
-            <span className="absolute inset-0 flex items-center justify-center rounded-full bg-[color:var(--color-text-label-select)]">
+        {checked ? (
+          <span className="relative block size-3 shrink-0">
+            <span className="absolute inset-0 flex items-center justify-center rounded-full bg-[color:var(--color-label)]">
               <Image
                 src="/icons/small_union.svg"
                 alt=""
@@ -87,15 +89,8 @@ function ResultOptionItem({ option, checked }: ResultOptionItemProps) {
                 aria-hidden="true"
               />
             </span>
-          ) : (
-            <span
-              className={cn(
-                'absolute inset-0 rounded-full border',
-                'border-[color:var(--color-text-label-not-select)]',
-              )}
-            />
-          )}
-        </span>
+          </span>
+        ) : null}
 
         <Sans.T160
           as="span"
@@ -123,6 +118,13 @@ function ResultOptionItem({ option, checked }: ResultOptionItemProps) {
 
 export default function Page() {
   const router = useRouter();
+  const { data: authUser } = useCurrentUserQuery();
+  const adminAccount = authUser
+    ? getAdminAccountByUsername(authUser.username)
+    : undefined;
+  const usesExecutiveTheme = Boolean(
+    authUser?.isAdmin || adminAccount?.usesExecutiveTheme,
+  );
   const poll = MOCK_POLL_RESULT;
   const turnoutPercentage = Math.round(
     (poll.votedCount / poll.totalVoters) * 100,
@@ -143,6 +145,7 @@ export default function Page() {
               alt="뒤로가기"
               width={24}
               height={24}
+              className={usesExecutiveTheme ? 'brightness-0 invert' : undefined}
             />
           </button>
 

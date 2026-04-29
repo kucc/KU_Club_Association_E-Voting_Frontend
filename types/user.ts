@@ -19,4 +19,6 @@ export interface UserProfile {
   department: string;
   studentId: string;
   status: string;
+  usesExecutiveTheme?: boolean;
+  showsExecutiveBadge?: boolean;
 }
