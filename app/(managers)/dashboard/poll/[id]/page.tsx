@@ -1,5 +1,6 @@
 'use client';
 
+import { getEligibleVoterCount } from '@/app/(members)/_utils/poll-display';
 import { Sans } from '@/app/ui/sans';
 import {
   useEndPollMutation,
@@ -53,12 +54,13 @@ export default function AdminPollDetailPage({
 
   const { poll, results } = data;
 
-  const totalVoters = 100;
+  const totalVoters = getEligibleVoterCount();
   const votedCount = results.reduce(
     (acc: number, curr: PollResultItem) => acc + curr.count,
     0,
   );
-  const turnoutPercentage = Math.round((votedCount / totalVoters) * 100);
+  const turnoutPercentage =
+    totalVoters > 0 ? Math.round((votedCount / totalVoters) * 100) : 0;
   const maxCount = Math.max(...results.map((r: PollResultItem) => r.count));
 
   //  투표 시작 핸들러
@@ -85,7 +87,7 @@ export default function AdminPollDetailPage({
 
   return (
     <main className="theme-executive min-h-screen bg-[#303030] pb-20 font-['Pretendard']">
-      <div className="pt-4">
+      <div className="pt-15.5">
         <header className="flex h-11 items-center gap-4 px-5">
           <button
             type="button"
@@ -194,51 +196,38 @@ export default function AdminPollDetailPage({
                 })}
               </div>
 
-              <div className="flex w-full gap-[8px]">
-                {/* 1. 대기 중일 때는 [시작하기] */}
-                {poll.status === 'pending' && (
-                  <button
-                    onClick={handleStartPoll}
-                    disabled={isStarting}
-                    className="h-[44px] flex-1 rounded-[10px] bg-[#28A745] font-semibold text-[#FFFFFF] disabled:opacity-50"
-                  >
-                    {isStarting ? '시작 중...' : '시작하기'}
-                  </button>
-                )}
+              {poll.status !== 'completed' && (
+                <div className="flex w-full gap-[8px]">
+                  {poll.status === 'pending' && (
+                    <button
+                      onClick={handleStartPoll}
+                      disabled={isStarting}
+                      className="h-[44px] flex-1 rounded-[10px] bg-[#28A745] font-semibold text-[#FFFFFF] disabled:opacity-50"
+                    >
+                      {isStarting ? '시작 중...' : '시작하기'}
+                    </button>
+                  )}
 
-                {/* 2. 진행 중일 때는 [종료하기] */}
-                {poll.status === 'continuing' && (
-                  <button
-                    onClick={handleEndPoll}
-                    disabled={isEnding}
-                    className="h-[44px] flex-1 rounded-[10px] bg-[#848485] font-semibold text-[#FFFFFF] disabled:opacity-50"
-                  >
-                    {isEnding ? '종료 중...' : '종료하기'}
-                  </button>
-                )}
+                  {poll.status === 'continuing' && (
+                    <button
+                      onClick={handleEndPoll}
+                      disabled={isEnding}
+                      className="h-[44px] flex-1 rounded-[10px] bg-[#848485] font-semibold text-[#FFFFFF] disabled:opacity-50"
+                    >
+                      {isEnding ? '종료 중...' : '종료하기'}
+                    </button>
+                  )}
 
-                {/* 3. 종료되지 않은 경우에만 [수정하기] 노출 */}
-                {poll.status !== 'completed' && (
                   <button
                     onClick={() =>
-                      router.push(`/dashboard/poll/${params.id}/edit`)
+                      router.replace(`/dashboard/poll/${params.id}/edit`)
                     }
                     className="h-[44px] flex-[2.5] rounded-[10px] bg-[#A0191E] font-semibold text-[#FFFFFF]"
                   >
                     수정하기
                   </button>
-                )}
-
-                {/* 4. 종료된 경우 목록으로 돌아가는 버튼 (선택사항) */}
-                {poll.status === 'completed' && (
-                  <button
-                    onClick={() => router.push('/dashboard/poll')}
-                    className="h-[44px] flex-1 rounded-[10px] bg-[#52514E] font-semibold text-[#FFFFFF]"
-                  >
-                    목록으로
-                  </button>
-                )}
-              </div>
+                </div>
+              )}
             </div>
           </Card>
         </div>
