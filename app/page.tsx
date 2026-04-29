@@ -21,7 +21,7 @@ export default function Home() {
   const polls = usePollsQuery();
 
   const { setTheme } = useTheme();
-  const { mutate: signOut } = useSignOutMutation();
+  const { mutate: _signOut } = useSignOutMutation();
 
   const isManager = isSuccess && data?.isAdmin;
 
@@ -31,6 +31,11 @@ export default function Home() {
   const scheduledVotes = (polls.data || []).filter(
     (v) => v.status === 'pending',
   );
+
+  const signOut = () => {
+    setTheme('theme-default');
+    _signOut();
+  };
 
   useEffect(() => {
     if (!isSuccess) return;
