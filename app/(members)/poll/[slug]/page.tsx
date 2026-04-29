@@ -1,11 +1,24 @@
 'use client';
 
+import { getAdminPositionById } from '@/app/(members)/_data/user-directory';
+import {
+  getThemeByUserProfile,
+  toUserProfile,
+} from '@/app/(members)/_utils/poll-display';
 import { Sans } from '@/app/ui/sans';
+import { useCurrentUserQuery } from '@/hooks/queries/useAuthQuery';
+import { usePollResultsQuery } from '@/hooks/queries/usePollQuery';
+import {
+  useCastVoteMutation,
+  useEditVoteMutation,
+  useMyVoteQuery,
+} from '@/hooks/queries/useVoteQuery';
+import { useTheme } from '@/providers/theme-provider';
 
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 
 import Card from '@/components/common/card';
 import Label from '@/components/common/card/label';
@@ -14,31 +27,6 @@ import Title from '@/components/common/card/title';
 import { cn, formatDate } from '@/lib/utils';
 
 import VoteSuccessModal from './_components/vote-success-modal';
-
-type MockPoll = {
-  id: number;
-  slug: string;
-  question: string;
-  description: string; //mock 전용
-  proposer: string; //mock 전용
-  ended_at: string;
-  options: string[];
-};
-
-const MOCK_POLLS: MockPoll[] = [
-  {
-    id: 1,
-    slug: 'chairman-election-1',
-    question: '제1회 동아리연합회장 선거',
-    description:
-      '투표 설명 어쩌고 저쩌고...\n무슨 투표인지\n뭐시기뭐시기\n어쩌고저쩌고',
-    proposer: '홍길동',
-    ended_at: '2026-04-08T10:00:00.000Z',
-    options: ['찬성', '반대', '기권'],
-  },
-];
-
-const MOCK_INITIAL_MY_VOTE: string | null = null;
 
 type VoteOptionItemProps = Readonly<{
   label: string;
@@ -64,7 +52,7 @@ function VoteOptionItem({ label, checked, onSelect }: VoteOptionItemProps) {
           <span
             className={cn(
               'absolute inset-0 flex items-center justify-center rounded-full',
-              'bg-[color:var(--color-text-label-select)]',
+              'bg-[color:var(--color-label)]',
             )}
           >
             <Image
@@ -97,38 +85,88 @@ function VoteOptionItem({ label, checked, onSelect }: VoteOptionItemProps) {
   );
 }
 
-type SubmitButtonState = 'enabled' | 'soft-disabled' | 'done-disabled';
+type SubmitButtonState =
+  | 'enabled'
+  | 'soft-disabled'
+  | 'unchanged-disabled'
+  | 'done-disabled';
 
-/* api 사용 시 Props 타입 정의
-  type Props = Readonly<{
-  params: Promise<{ slug: string }>;
-}>;
+type PollDetailFields = {
+  description?: string;
+  proposer?: string;
+};
 
-export default function Page({ params }: Props) {  */
+const getOptionalPollText = (
+  poll: object,
+  key: keyof PollDetailFields,
+): string | undefined => {
+  const value = (poll as Record<string, unknown>)[key];
+
+  return typeof value === 'string' && value.trim().length > 0
+    ? value
+    : undefined;
+};
+
 export default function Page() {
   const router = useRouter();
-  const poll = MOCK_POLLS[0];
+  const { setTheme } = useTheme();
+  const params = useParams<{ slug: string }>();
+  const pollId = Number(params.slug);
 
-  const [currentVote, setCurrentVote] = useState<string | null>(
-    MOCK_INITIAL_MY_VOTE,
-  );
-  const [selectedOption, setSelectedOption] = useState<string | null>(
-    MOCK_INITIAL_MY_VOTE,
-  );
+  const { data: authUser, isLoading: isAuthLoading } = useCurrentUserQuery();
+  const { data: pollResult, isLoading: isPollLoading } =
+    usePollResultsQuery(pollId);
+  const { data: myVote, isLoading: isMyVoteLoading } = useMyVoteQuery(pollId);
+  const castVoteMutation = useCastVoteMutation(pollId);
+  const editVoteMutation = useEditVoteMutation(pollId);
+
+  const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [submitErrorMessage, setSubmitErrorMessage] = useState<string | null>(
+    null,
+  );
   const [isSubmittedState, setIsSubmittedState] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
 
+  const userProfile = useMemo(() => {
+    return authUser ? toUserProfile(authUser) : null;
+  }, [authUser]);
+
+  useEffect(() => {
+    if (userProfile) setTheme(getThemeByUserProfile(userProfile));
+  }, [userProfile, setTheme]);
+
+  const poll = pollResult?.poll;
+  const isCurrentUserSubstitute = Boolean(
+    authUser?.isSubstitute || authUser?.username.endsWith('_sub'),
+  );
+  const isSubmitting = castVoteMutation.isPending || editVoteMutation.isPending;
+  const pollDescription = poll
+    ? getOptionalPollText(poll, 'description')
+    : undefined;
+  const pollProposer = poll ? getOptionalPollText(poll, 'proposer') : undefined;
+
+  const currentVote = myVote?.selected ?? null;
+  const displayedSelection = selectedOption ?? currentVote;
   const hasExistingVote = currentVote !== null;
-  const hasChangedSelection = selectedOption !== currentVote;
+  const isUnchangedExistingSelection =
+    hasExistingVote &&
+    (selectedOption === null || selectedOption === currentVote);
+  const hasChangedSelection =
+    selectedOption !== null && selectedOption !== currentVote;
   const canSubmit =
-    selectedOption !== null && !isSubmittedState && hasChangedSelection;
+    selectedOption !== null &&
+    !isSubmittedState &&
+    hasChangedSelection &&
+    !isSubmitting;
 
   const submitButtonState: SubmitButtonState = isSubmittedState
     ? 'done-disabled'
     : canSubmit
       ? 'enabled'
-      : 'soft-disabled';
+      : isUnchangedExistingSelection
+        ? 'unchanged-disabled'
+        : 'soft-disabled';
 
   const submitButtonLabel = isSubmittedState
     ? '투표 완료'
@@ -141,26 +179,79 @@ export default function Page() {
     setSelectedOption(option);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!canSubmit || selectedOption === null) return;
-    // API 연결 시:
-    //   최초 투표 → POST /api/votes/vote { poll_id, selected }
-    //   수정 투표 → PATCH /api/votes/edit-vote { poll_id, selected }
+
     setIsEditMode(hasExistingVote);
-    setCurrentVote(selectedOption);
-    setIsSubmittedState(true);
-    setShowSuccessModal(true);
+    setSubmitErrorMessage(null);
+
+    try {
+      if (hasExistingVote) {
+        await editVoteMutation.mutateAsync(selectedOption);
+      } else {
+        await castVoteMutation.mutateAsync(selectedOption);
+      }
+
+      setIsSubmittedState(true);
+      setShowSuccessModal(true);
+    } catch (error) {
+      const isSubstituteVoteError =
+        error instanceof Error &&
+        (error.message.includes('Counterpart account') ||
+          error.message.toLowerCase().includes('poll is not available'));
+      const message = isSubstituteVoteError
+        ? isCurrentUserSubstitute
+          ? '대표자 계정으로 투표 완료'
+          : '대리인 계정으로 투표 완료'
+        : error instanceof Error
+          ? error.message
+          : '투표 처리 중 문제가 발생했습니다';
+
+      setSubmitErrorMessage(message);
+      setShowSuccessModal(true);
+    }
   };
 
+  if (!Number.isFinite(pollId) || pollId <= 0) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-background">
+        <Sans.T200
+          as="p"
+          color="heading-page"
+        >
+          올바르지 않은 투표입니다.
+        </Sans.T200>
+      </main>
+    );
+  }
+
+  if (isAuthLoading || isPollLoading || isMyVoteLoading || !poll) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-background">
+        <Sans.T200
+          as="p"
+          color="heading-page"
+        >
+          로딩 중...
+        </Sans.T200>
+      </main>
+    );
+  }
+
   return (
-    <main className="theme-default min-h-screen bg-background">
+    <main className="min-h-screen bg-background">
       <div className="pt-4">
         <header className="flex h-11 items-center gap-4 px-5">
           <button
             type="button"
             aria-label="뒤로가기"
             onClick={() => router.back()}
-            className="flex size-6 items-center justify-center opacity-50"
+            className={cn(
+              'flex size-6 items-center justify-center',
+              userProfile?.usesExecutiveTheme
+                ? 'brightness-0 invert'
+                : 'opacity-50',
+            )}
           >
             <Image
               src="/icons/back.svg"
@@ -181,7 +272,6 @@ export default function Page() {
           </Sans.T200>
         </header>
 
-        {/* 카드 컨테이너 */}
         <div className="px-5 pt-6 pb-8">
           <Card>
             <div className="flex flex-col gap-5">
@@ -190,35 +280,44 @@ export default function Page() {
               <div className="flex flex-col gap-2">
                 <Label
                   name="마감 기한"
-                  content={`${formatDate(poll.ended_at)}에 종료`}
+                  content={
+                    poll.ended_at
+                      ? `${formatDate(poll.ended_at)}에 종료`
+                      : '미정'
+                  }
                 />
                 <Label
                   name="발의자"
-                  content={poll.proposer}
+                  content={
+                    pollProposer ??
+                    getAdminPositionById(poll.created_by) ??
+                    `사용자 #${poll.created_by}`
+                  }
                 />
               </div>
-              <Sans.T140
-                as="p"
-                color="title-value"
-                lineHeight="20px"
-                className="whitespace-pre-line"
-              >
-                {poll.description}
-              </Sans.T140>
 
-              {/* 투표 옵션 목록 */}
+              {pollDescription ? (
+                <Sans.T140
+                  as="p"
+                  color="title-value"
+                  lineHeight="20px"
+                  className="whitespace-pre-line"
+                >
+                  {pollDescription}
+                </Sans.T140>
+              ) : null}
+
               <div className="flex flex-col gap-3">
                 {poll.options.map((option) => (
                   <VoteOptionItem
                     key={option}
                     label={option}
-                    checked={selectedOption === option}
+                    checked={displayedSelection === option}
                     onSelect={() => handleSelectOption(option)}
                   />
                 ))}
               </div>
 
-              {/* 제출 버튼 */}
               <button
                 type="button"
                 disabled={submitButtonState !== 'enabled'}
@@ -227,6 +326,8 @@ export default function Page() {
                   'flex h-11 w-full items-center justify-center rounded-[10px] px-2.5 py-3',
                   submitButtonState === 'enabled' && 'bg-label',
                   submitButtonState === 'soft-disabled' && 'bg-label-home',
+                  submitButtonState === 'unchanged-disabled' &&
+                    'bg-[var(--voting-crimson-300)]',
                   submitButtonState === 'done-disabled' && 'bg-label-success',
                 )}
               >
@@ -236,7 +337,7 @@ export default function Page() {
                   lineHeight="20px"
                   color="label"
                 >
-                  {submitButtonLabel}
+                  {isSubmitting ? '처리 중...' : submitButtonLabel}
                 </Sans.T160>
               </button>
             </div>
@@ -244,11 +345,15 @@ export default function Page() {
         </div>
       </div>
 
-      {/* VoteSuccessModal 렌더링 */}
       {showSuccessModal ? (
         <VoteSuccessModal
-          onClose={() => setShowSuccessModal(false)}
+          onClose={() => {
+            setShowSuccessModal(false);
+            setSubmitErrorMessage(null);
+          }}
           isEdit={isEditMode}
+          variant={submitErrorMessage ? 'error' : 'success'}
+          message={submitErrorMessage ?? undefined}
         />
       ) : null}
     </main>
