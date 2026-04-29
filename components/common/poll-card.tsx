@@ -74,7 +74,12 @@ export default function PollCard({
       <Button
         content={isAdmin ? '상세보기' : myVote ? '투표 수정하기' : '투표하기'}
         onClick={() => {
-          if (onAction) onAction();
+          if (onAction) {
+            onAction();
+            return;
+          }
+
+          if (!id) return;
 
           router.push(isAdmin ? `/dashboard/poll/${id}` : `/poll/${id}`);
         }}
