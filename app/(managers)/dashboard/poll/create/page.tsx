@@ -14,6 +14,7 @@ export default function AdminPollCreatePage() {
 
   const [question, setQuestion] = useState('');
   const [description, setDescription] = useState('');
+  const [endedAt, setEndedAt] = useState('');
 
   const MAX_LENGTH = 500;
 
@@ -42,8 +43,9 @@ export default function AdminPollCreatePage() {
           </Sans.T200>
         </header>
 
-        <div className="scrollbar-hide flex flex-1 flex-col gap-[24px] overflow-y-auto px-[20px] py-[24px]">
-          {/* 상단: 입력 영역 */}
+        {/* --- 스크롤 가능한 메인 영역 --- */}
+        <div className="scrollbar-hide flex flex-1 flex-col gap-[32px] overflow-y-auto px-[20px] py-[24px]">
+          {/* 1. 제목 및 설명 입력 */}
           <div className="flex shrink-0 flex-col gap-[24px]">
             <input
               type="text"
@@ -53,36 +55,52 @@ export default function AdminPollCreatePage() {
               className="w-full border-none bg-transparent text-[20px] leading-[24px] font-bold text-[#FFFFFF] outline-none placeholder:text-[#848485]"
             />
 
-            <textarea
-              placeholder="투표 설명을 작성하세요 (최대 500자)"
-              value={description}
-              onChange={(e) =>
-                setDescription(e.target.value.slice(0, MAX_LENGTH))
-              }
-              className="h-[200px] w-full resize-none border-none bg-transparent text-[14px] leading-[20px] font-normal text-[#FFFFFF] outline-none placeholder:text-[#52514E]"
+            <div className="flex flex-col gap-2">
+              <textarea
+                placeholder="투표 설명을 작성하세요 (최대 500자)"
+                value={description}
+                onChange={(e) =>
+                  setDescription(e.target.value.slice(0, MAX_LENGTH))
+                }
+                className="h-[250px] w-full resize-none border-none bg-transparent text-[14px] leading-[20px] font-normal text-[#FFFFFF] outline-none placeholder:text-[#52514E]"
+              />
+
+              <div className="flex h-[17px] w-full items-center justify-end gap-[2px]">
+                <span
+                  className={cn(
+                    'text-[12px] leading-[17px] font-medium transition-colors',
+                    description.length >= MAX_LENGTH
+                      ? 'text-[#A0191E]'
+                      : 'text-[#D2D8DB]',
+                  )}
+                >
+                  {description.length}
+                </span>
+                <span className="text-[12px] leading-[17px] font-medium text-[#848485]">
+                  / {MAX_LENGTH}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* 2. 종료 기한 설정  */}
+          <div className="flex shrink-0 flex-col gap-3">
+            <Sans.T140
+              as="p"
+              color="profile-label"
+            >
+              종료 기한 설정
+            </Sans.T140>
+            <input
+              type="datetime-local"
+              value={endedAt}
+              onChange={(e) => setEndedAt(e.target.value)}
+              className="h-11 w-full rounded-[10px] border border-transparent bg-[#52514E] px-4 text-[14px] text-white [color-scheme:dark] transition-all outline-none focus:border-[#A0191E]"
             />
           </div>
 
-          {/* 하단: 카운터 + 참고사항 영역 */}
-          <div className="mt-auto flex flex-col gap-[24px] pb-[120px]">
-            {/* 글자 수 카운터 */}
-            <div className="flex h-[17px] w-full items-center justify-end">
-              <span
-                className={cn(
-                  'text-[14px] leading-[17px] font-medium transition-colors',
-                  description.length >= MAX_LENGTH
-                    ? 'text-[#A0191E]'
-                    : 'text-[#D2D8DB]',
-                )}
-              >
-                {description.length}
-              </span>
-              <span className="text-[14px] leading-[17px] font-medium text-[#848485]">
-                / {MAX_LENGTH}
-              </span>
-            </div>
-
-            {/* 참고사항 박스 */}
+          {/* 3. 하단 주의사항 */}
+          <div className="flex flex-col gap-[24px] pb-[120px]">
             <div className="box-border flex min-h-[122px] w-full flex-col items-start justify-center gap-[10px] rounded-[16px] bg-[#52514E] p-[16px]">
               <p className="m-0 text-[14px] leading-[20px] font-medium text-[#D2D8DB]">
                 투표 작성 전 주의사항
