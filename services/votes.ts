@@ -1,3 +1,5 @@
+import axios from 'axios';
+
 import { type ApiSuccessResponse, apiClient, parseApiError } from './api';
 
 type VoteActionRequest = {
@@ -90,6 +92,10 @@ export const getMyVote = async (pollId: number): Promise<MyVote | null> => {
 
     return data.vote;
   } catch (error) {
+    if (axios.isAxiosError(error) && error.response?.status === 404) {
+      return null;
+    }
+
     throw new Error(parseApiError(error).message);
   }
 };

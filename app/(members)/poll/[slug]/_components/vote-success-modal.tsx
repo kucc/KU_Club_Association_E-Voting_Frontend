@@ -6,12 +6,21 @@ import { useEffect } from 'react';
 
 import Image from 'next/image';
 
+import { cn } from '@/lib/utils';
+
 type Props = Readonly<{
   onClose: () => void;
   isEdit?: boolean;
+  variant?: 'success' | 'error';
+  message?: string;
 }>;
 
-export default function VoteSuccessModal({ onClose, isEdit = false }: Props) {
+export default function VoteSuccessModal({
+  onClose,
+  isEdit = false,
+  variant = 'success',
+  message,
+}: Props) {
   useEffect(() => {
     const timer = window.setTimeout(() => {
       onClose();
@@ -22,18 +31,28 @@ export default function VoteSuccessModal({ onClose, isEdit = false }: Props) {
     };
   }, [onClose]);
 
+  const isError = variant === 'error';
+  const label = message ?? (isEdit ? '수정 완료!' : '투표 완료!');
+
   return (
     <div
       role="dialog"
       aria-modal="true"
-      aria-label={isEdit ? '수정 완료' : '투표 완료'}
+      aria-label={label}
       className="fixed inset-0 z-50 flex items-center justify-center"
     >
-      <div className="flex size-[173px] items-center justify-center rounded-[40px] bg-background-popup shadow-[0px_12px_74px_rgba(0,0,0,0.22)]">
+      <div
+        className={cn(
+          'flex items-center justify-center bg-background-popup shadow-[0px_12px_74px_rgba(0,0,0,0.22)]',
+          isError
+            ? 'h-[132px] w-[300px] rounded-[32px] px-6'
+            : 'size-[173px] rounded-[40px]',
+        )}
+      >
         <div className="flex flex-col items-center gap-4">
           <Image
-            src="/icons/union.svg"
-            alt={isEdit ? '수정 완료 체크 아이콘' : '투표 완료 체크 아이콘'}
+            src={isError ? '/icons/x.svg' : '/icons/union.svg'}
+            alt={isError ? '투표 불가 안내 아이콘' : '투표 완료 체크 아이콘'}
             width={46}
             height={44}
             priority
@@ -46,7 +65,7 @@ export default function VoteSuccessModal({ onClose, isEdit = false }: Props) {
             color="title-card"
             className="text-center"
           >
-            {isEdit ? '수정 완료!' : '투표 완료!'}
+            {label}
           </Sans.T200>
         </div>
       </div>

@@ -1,5 +1,7 @@
 import { PollStatistics } from '@/types/poll';
 
+import Link from 'next/link';
+
 import { formatDate } from '@/lib/utils';
 
 import Card from './card';
@@ -14,6 +16,9 @@ type Props = Readonly<{
   results: string;
 
   isAgent?: boolean;
+  badgeLabel?: string;
+  hideMyVote?: boolean;
+  href?: string;
 }>;
 
 export default function HistoryCard({
@@ -23,20 +28,23 @@ export default function HistoryCard({
   statistics,
   results,
   isAgent,
+  badgeLabel,
+  hideMyVote,
+  href,
 }: Props) {
+  const attendanceRate =
+    statistics.quota > 0
+      ? Math.round((statistics.votes / statistics.quota) * 100)
+      : 0;
   const labels: LabelType[] = [
     {
       name: '마감 기한',
       content: formatDate(deadline),
     },
     {
-      name: '내 투표',
-      content: myVote,
-    },
-    {
       name: '출석률',
       content: `${statistics.votes} `,
-      subContent: `/ ${statistics.quota} (${Math.round((statistics.votes / statistics.quota) * 100)}%)`,
+      subContent: `/ ${statistics.quota} (${attendanceRate}%)`,
     },
     {
       name: '결과',
@@ -44,14 +52,33 @@ export default function HistoryCard({
     },
   ];
 
-  return (
+  if (!hideMyVote) {
+    labels.splice(1, 0, {
+      name: '내 투표',
+      content: myVote,
+    });
+  }
+
+  const card = (
     <Card>
       <Title
         content={title}
         isAgent={isAgent}
+        badgeLabel={badgeLabel}
       />
 
       <Labels labels={labels} />
     </Card>
+  );
+
+  if (!href) return card;
+
+  return (
+    <Link
+      href={href}
+      className="block"
+    >
+      {card}
+    </Link>
   );
 }
