@@ -21,4 +21,5 @@ export interface UserProfile {
   status: string;
   usesExecutiveTheme?: boolean;
   showsExecutiveBadge?: boolean;
+  canOpenMemberResultPage?: boolean;
 }

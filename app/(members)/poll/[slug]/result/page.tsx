@@ -1,11 +1,20 @@
 'use client';
 
-import { getAdminAccountByUsername } from '@/app/(members)/_data/user-directory';
+import { getAdminPositionById } from '@/app/(members)/_data/user-directory';
+import {
+  getThemeByUserProfile,
+  toUserProfile,
+} from '@/app/(members)/_utils/poll-display';
 import { Sans } from '@/app/ui/sans';
 import { useCurrentUserQuery } from '@/hooks/queries/useAuthQuery';
+import { usePollResultsQuery } from '@/hooks/queries/usePollQuery';
+import { useMyVoteQuery } from '@/hooks/queries/useVoteQuery';
+import { useTheme } from '@/providers/theme-provider';
+
+import { useEffect, useMemo } from 'react';
 
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 
 import Card from '@/components/common/card';
 import Label from '@/components/common/card/label';
@@ -19,35 +28,20 @@ type PollResultOption = {
   percentage: number;
 };
 
-type MockPollResult = {
-  id: number;
-  slug: string;
-  question: string;
-  description: string;
-  manager: string;
-  ended_at: string;
-  totalVoters: number;
-  votedCount: number;
-  myVote: string;
-  options: PollResultOption[];
+type PollDetailFields = {
+  description?: string;
+  proposer?: string;
 };
 
-const MOCK_POLL_RESULT: MockPollResult = {
-  id: 1,
-  slug: 'chairman-election-1',
-  question: '제1회 동아리연합회장 선거',
-  description:
-    '투표 설명 어쩌고 저쩌고..\n무슨 투표인지\n뭐시기뭐시기\n어쩌고저쩌고',
-  manager: '홍길동',
-  ended_at: '2026-04-07T16:00:00.000Z',
-  totalVoters: 24,
-  votedCount: 12,
-  myVote: '찬성',
-  options: [
-    { label: '찬성', voteCount: 10, percentage: 40 },
-    { label: '반대', voteCount: 7, percentage: 30 },
-    { label: '기권', voteCount: 7, percentage: 30 },
-  ],
+const getOptionalPollText = (
+  poll: object,
+  key: keyof PollDetailFields,
+): string | undefined => {
+  const value = (poll as Record<string, unknown>)[key];
+
+  return typeof value === 'string' && value.trim().length > 0
+    ? value
+    : undefined;
 };
 
 type ResultOptionItemProps = Readonly<{
@@ -118,17 +112,88 @@ function ResultOptionItem({ option, checked }: ResultOptionItemProps) {
 
 export default function Page() {
   const router = useRouter();
-  const { data: authUser } = useCurrentUserQuery();
-  const adminAccount = authUser
-    ? getAdminAccountByUsername(authUser.username)
-    : undefined;
-  const usesExecutiveTheme = Boolean(
-    authUser?.isAdmin || adminAccount?.usesExecutiveTheme,
+  const { setTheme } = useTheme();
+  const params = useParams<{ slug: string }>();
+  const pollId = Number(params.slug);
+
+  const { data: authUser, isLoading: isAuthLoading } = useCurrentUserQuery();
+  const {
+    data: pollResult,
+    isLoading: isPollLoading,
+    isError: isPollError,
+    error: pollError,
+  } = usePollResultsQuery(pollId);
+  const { data: myVote, isLoading: isMyVoteLoading } = useMyVoteQuery(pollId);
+
+  const userProfile = useMemo(() => {
+    return authUser ? toUserProfile(authUser) : null;
+  }, [authUser]);
+
+  useEffect(() => {
+    if (userProfile) setTheme(getThemeByUserProfile(userProfile));
+  }, [userProfile, setTheme]);
+
+  if (!Number.isFinite(pollId) || pollId <= 0) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-background">
+        <Sans.T200
+          as="p"
+          color="heading-page"
+        >
+          올바르지 않은 투표입니다.
+        </Sans.T200>
+      </main>
+    );
+  }
+
+  if (isPollError) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-background px-5 text-center">
+        <Sans.T200
+          as="p"
+          color="heading-page"
+        >
+          {pollError instanceof Error
+            ? pollError.message
+            : '투표 결과를 불러오는 중 문제가 발생했습니다.'}
+        </Sans.T200>
+      </main>
+    );
+  }
+
+  if (isAuthLoading || isPollLoading || isMyVoteLoading || !pollResult) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-background">
+        <Sans.T200
+          as="p"
+          color="heading-page"
+        >
+          로딩 중...
+        </Sans.T200>
+      </main>
+    );
+  }
+
+  const { poll, results } = pollResult;
+  const pollDescription = getOptionalPollText(poll, 'description');
+  const pollProposer = getOptionalPollText(poll, 'proposer');
+  const totalVotes = results.reduce((total, result) => total + result.count, 0);
+  const turnoutPercentage = totalVotes > 0 ? 100 : 0;
+  const resultCountByOption = new Map(
+    results.map((result) => [result.selected, result.count]),
   );
-  const poll = MOCK_POLL_RESULT;
-  const turnoutPercentage = Math.round(
-    (poll.votedCount / poll.totalVoters) * 100,
-  );
+  const options = poll.options.map((option) => {
+    const voteCount = resultCountByOption.get(option) ?? 0;
+    const percentage =
+      totalVotes > 0 ? Math.round((voteCount / totalVotes) * 100) : 0;
+
+    return {
+      label: option,
+      voteCount,
+      percentage,
+    };
+  });
+  const currentVote = myVote?.selected ?? null;
 
   return (
     <main className="min-h-screen bg-background">
@@ -145,7 +210,11 @@ export default function Page() {
               alt="뒤로가기"
               width={24}
               height={24}
-              className={usesExecutiveTheme ? 'brightness-0 invert' : undefined}
+              className={
+                userProfile?.usesExecutiveTheme
+                  ? 'brightness-0 invert'
+                  : undefined
+              }
             />
           </button>
 
@@ -167,34 +236,42 @@ export default function Page() {
             <div className="flex flex-col gap-3">
               <Label
                 name="마감 기한"
-                content={`${formatDate(poll.ended_at)}에 종료`}
+                content={
+                  poll.ended_at ? `${formatDate(poll.ended_at)}에 종료` : '미정'
+                }
               />
               <Label
                 name="책임자"
-                content={poll.manager}
+                content={
+                  pollProposer ??
+                  getAdminPositionById(poll.created_by) ??
+                  `사용자 #${poll.created_by}`
+                }
               />
               <Label
                 name="투표 현황"
-                content={`${poll.votedCount} `}
-                subContent={`/ ${poll.totalVoters} (${turnoutPercentage}%)`}
+                content={`${totalVotes} `}
+                subContent={`/ ${totalVotes} (${turnoutPercentage}%)`}
               />
             </div>
 
-            <Sans.T140
-              as="p"
-              color="title-value"
-              lineHeight="20px"
-              className="whitespace-pre-line"
-            >
-              {poll.description}
-            </Sans.T140>
+            {pollDescription ? (
+              <Sans.T140
+                as="p"
+                color="title-value"
+                lineHeight="20px"
+                className="whitespace-pre-line"
+              >
+                {pollDescription}
+              </Sans.T140>
+            ) : null}
 
             <div className="flex w-full flex-col gap-3">
-              {poll.options.map((option) => (
+              {options.map((option) => (
                 <ResultOptionItem
                   key={option.label}
                   option={option}
-                  checked={option.label === poll.myVote}
+                  checked={option.label === currentVote}
                 />
               ))}
             </div>

@@ -57,11 +57,13 @@ export default function Home() {
     poll,
     myVote: myVoteQueries[index]?.data ?? null,
   }));
+  const isManagementAdmin = user?.canOpenMemberResultPage === false;
 
   const votedPollRows = pollRows.filter((row) => row.myVote !== null);
+  const resultPollRows = isManagementAdmin ? pollRows : votedPollRows;
 
   const resultQueries = useQueries({
-    queries: votedPollRows.map(({ poll }) => ({
+    queries: resultPollRows.map(({ poll }) => ({
       queryKey: pollQueryKeys.detail(poll.id),
       queryFn: () => getPollResults(poll.id),
       enabled: Boolean(authUser),
@@ -71,7 +73,7 @@ export default function Home() {
   });
 
   const resultsByPollId = new Map(
-    votedPollRows.map(({ poll }, index) => [
+    resultPollRows.map(({ poll }, index) => [
       poll.id,
       resultQueries[index]?.data?.results,
     ]),
@@ -111,13 +113,12 @@ export default function Home() {
   // original_user_id 기준 대리인 vote 조회 API를 제공해야 함.
   const completedVotes = pollRows.filter(
     ({ poll, myVote }) =>
-      isPollStatus(poll, 'completed') &&
-      (user.role === 'EXECUTIVE' || myVote !== null),
+      isPollStatus(poll, 'completed') && (isManagementAdmin || myVote !== null),
   );
   const displayedCompletedVotes = completedVotes.slice(0, 3);
 
   const handlePollAction = (pollId: number) => {
-    if (user.role === 'EXECUTIVE') {
+    if (isManagementAdmin) {
       router.push(`/dashboard/poll/${pollId}`);
       return;
     }
@@ -217,7 +218,7 @@ export default function Home() {
                 value={user.department}
               />
               <ProfileRow
-                label={user.showsExecutiveBadge ? '권한' : '대표자'}
+                label={user.showsExecutiveBadge ? '권한' : '소속'}
                 value={user.studentId}
               />
               {/* <ProfileRow
@@ -256,7 +257,7 @@ export default function Home() {
                     votes: voteCount,
                   }}
                   myVote={myVote?.selected}
-                  isAdmin={user.role === 'EXECUTIVE'}
+                  isAdmin={isManagementAdmin}
                   onAction={() => handlePollAction(poll.id)}
                 />
               );
@@ -312,7 +313,12 @@ export default function Home() {
                   results={getResultText(results)}
                   isAgent={user.role === 'AGENT'}
                   badgeLabel={user.showsExecutiveBadge ? '임원진' : undefined}
-                  href={`/poll/${poll.id}/result`}
+                  hideMyVote={isManagementAdmin}
+                  href={
+                    user.canOpenMemberResultPage === false
+                      ? undefined
+                      : `/poll/${poll.id}/result`
+                  }
                 />
               );
             })

@@ -34,6 +34,7 @@ export const toUserProfile = (user: User): UserProfile => {
       status: '-',
       usesExecutiveTheme: true,
       showsExecutiveBadge: true,
+      canOpenMemberResultPage: adminAccount.authority === '투표자',
     };
   }
 
@@ -44,7 +45,7 @@ export const toUserProfile = (user: User): UserProfile => {
   return {
     name: user.username,
     role,
-    club: clubName,
+    club: '동아리',
     position: user.isAdmin ? '임원진' : user.isSubstitute ? '대리인' : '대표자',
     department: clubAccount?.division ?? '-',
     studentId: clubName,

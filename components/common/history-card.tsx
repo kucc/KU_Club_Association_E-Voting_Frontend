@@ -17,6 +17,7 @@ type Props = Readonly<{
 
   isAgent?: boolean;
   badgeLabel?: string;
+  hideMyVote?: boolean;
   href?: string;
 }>;
 
@@ -28,6 +29,7 @@ export default function HistoryCard({
   results,
   isAgent,
   badgeLabel,
+  hideMyVote,
   href,
 }: Props) {
   const attendanceRate =
@@ -40,10 +42,6 @@ export default function HistoryCard({
       content: formatDate(deadline),
     },
     {
-      name: '내 투표',
-      content: myVote,
-    },
-    {
       name: '출석률',
       content: `${statistics.votes} `,
       subContent: `/ ${statistics.quota} (${attendanceRate}%)`,
@@ -53,6 +51,13 @@ export default function HistoryCard({
       content: results,
     },
   ];
+
+  if (!hideMyVote) {
+    labels.splice(1, 0, {
+      name: '내 투표',
+      content: myVote,
+    });
+  }
 
   const card = (
     <Card>
