@@ -45,7 +45,7 @@ export default function AdminPollCreatePage() {
 
       alert('투표가 성공적으로 생성되었습니다! 목록 페이지로 이동합니다.');
 
-      router.push('/dashboard/poll'); // 성공 시 목록 페이지로 이동
+      router.push('/dashboard'); // 성공 시 목록 페이지로 이동
     } catch (error) {
       console.error('생성 실패:', error);
 
