@@ -12,7 +12,7 @@ import { cn } from '@/lib/utils';
 export default function AdminPollCreatePage() {
   const router = useRouter();
 
-  const [title, setTitle] = useState('');
+  const [question, setQuestion] = useState('');
   const [description, setDescription] = useState('');
 
   const MAX_LENGTH = 500;
@@ -48,8 +48,8 @@ export default function AdminPollCreatePage() {
             <input
               type="text"
               placeholder="투표 제목을 입력해주세요"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              value={question}
+              onChange={(e) => setQuestion(e.target.value)}
               className="w-full border-none bg-transparent text-[20px] leading-[24px] font-bold text-[#FFFFFF] outline-none placeholder:text-[#848485]"
             />
 
@@ -96,7 +96,7 @@ export default function AdminPollCreatePage() {
           </div>
         </div>
 
-        {/* --- 하단 고정 버튼 영역 (absolute로 띄워서 스크롤과 독립적으로 배치) --- */}
+        {/* --- 하단 고정 버튼 영역 --- */}
         <div className="absolute bottom-0 left-0 box-border flex w-full gap-[8px] bg-gradient-to-t from-[#303030] via-[#303030] to-transparent px-[20px] pt-[20px] pb-[40px]">
           <button
             type="button"
@@ -106,7 +106,7 @@ export default function AdminPollCreatePage() {
           </button>
           <button
             type="button"
-            disabled={!title || !description}
+            disabled={!question || !description}
             className="flex h-[46px] flex-1 items-center justify-center rounded-[8px] bg-[#A0191E] text-[16px] font-semibold text-[#FFFFFF] transition-transform active:scale-95 disabled:opacity-30"
           >
             작성 완료

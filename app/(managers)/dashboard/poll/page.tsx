@@ -3,7 +3,7 @@
 import { Sans } from '@/app/ui/sans';
 import { useTheme } from '@/providers/theme-provider';
 
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -14,31 +14,54 @@ import Title from '@/components/common/card/title';
 
 import { formatDate } from '@/lib/utils';
 
-type PollResultOption = {
-  label: string;
-  voteCount: number;
-  percentage: number;
+type AdminPollResult = {
+  id: number;
+  slug: string;
+  question: string;
+  description: string;
+  manager: string;
+  ended_at: string;
+  totalVoters: number;
+  votedCount: number;
+  options: {
+    label: string;
+    voteCount: number;
+    percentage: number;
+  }[];
 };
 
-// 일반 사용자 페이지처럼 게이지 바를 별도 컴포넌트로 분리
-type AdminResultOptionItemProps = Readonly<{
-  option: PollResultOption;
-  isHighest: boolean;
-}>;
+const MOCK_ADMIN_POLLS: AdminPollResult[] = [
+  {
+    id: 1,
+    slug: 'chairman-election-1',
+    question: '제1회 동아리연합회장 선거',
+    description:
+      '투표 설명 어쩌고 저쩌고...\n무슨 투표인지\n뭐시기뭐시기\n어쩌고저쩌고',
+    manager: '홍길동',
+    ended_at: '2026-04-07T16:00:00.000Z',
+    totalVoters: 24,
+    votedCount: 12,
+    options: [
+      { label: '찬성', voteCount: 5, percentage: 41 },
+      { label: '반대', voteCount: 4, percentage: 33 },
+      { label: '기권', voteCount: 3, percentage: 26 },
+    ],
+  },
+];
 
-function AdminResultOptionItem({
+function ResultOptionItem({
   option,
   isHighest,
-}: AdminResultOptionItemProps) {
-  // 관리자 전용 피그마 색상
+}: {
+  option: AdminPollResult['options'][0];
+  isHighest: boolean;
+}) {
   const colorHex = isHighest ? '#F8A1A4' : '#A9ABAD';
-
   return (
     <div
-      className="relative h-11 w-full overflow-hidden rounded-[10px] border bg-[#52514E] transition-all"
+      className="relative h-11 w-full overflow-hidden rounded-[10px] border bg-[#52514E]"
       style={{ borderColor: colorHex }}
     >
-      {/* 일반 사용자 코드의 color-mix 방식 차용 */}
       <div
         className="absolute inset-y-0 left-0 transition-all duration-500"
         style={{
@@ -46,8 +69,7 @@ function AdminResultOptionItem({
           backgroundColor: `color-mix(in srgb, ${colorHex} 30%, transparent)`,
         }}
       />
-
-      <div className="absolute inset-0 flex items-center justify-between px-4 py-3 text-left">
+      <div className="absolute inset-0 flex items-center justify-between px-4 py-3">
         <span
           className="text-[16px] leading-[20px] font-semibold"
           style={{ color: colorHex }}
@@ -72,47 +94,34 @@ export default function AdminPollDetailPage({
 }) {
   const router = useRouter();
   const { setTheme } = useTheme();
-  const pollId = params.id;
 
-  useEffect(() => {
-    setTheme('theme-executive');
-  }, [setTheme]);
-
-  const poll = {
-    question: '제1회 동아리연합회장 선거',
-    ended_at: '2026-04-07T16:00:00.000Z',
-    manager: '홍길동',
-    description:
-      '투표 설명 어쩌고 저쩌고..\n무슨 투표인지\n뭐시기뭐시기\n어쩌고저쩌고',
-    totalVoters: 24,
-    votedCount: 12,
-    options: [
-      { label: '찬성', voteCount: 5, percentage: 41 },
-      { label: '반대', voteCount: 4, percentage: 33 },
-      { label: '기권', voteCount: 3, percentage: 26 },
-    ],
-  };
-
+  const poll = useMemo(() => {
+    return (
+      MOCK_ADMIN_POLLS.find((p) => String(p.id) === params.id) ||
+      MOCK_ADMIN_POLLS[0]
+    );
+  }, [params.id]);
   const turnoutPercentage = Math.round(
     (poll.votedCount / poll.totalVoters) * 100,
   );
   const maxCount = Math.max(...poll.options.map((o) => o.voteCount));
 
+  useEffect(() => {
+    setTheme('theme-executive');
+  }, [setTheme]);
+
   return (
-    // 배경색 유지
-    <main className="theme-executive min-h-screen bg-[#303030] pb-20">
-      {/* 헤더 */}
+    <main className="theme-executive min-h-screen bg-[#303030] pb-20 font-['Pretendard']">
       <div className="pt-4">
         <header className="flex h-11 items-center gap-4 px-5">
           <button
             type="button"
-            aria-label="뒤로가기"
             onClick={() => router.back()}
             className="flex size-6 items-center justify-center opacity-50 brightness-0 invert"
           >
             <Image
               src="/icons/back.svg"
-              alt="뒤로가기"
+              alt="back"
               width={24}
               height={24}
             />
@@ -120,8 +129,6 @@ export default function AdminPollDetailPage({
           <Sans.T200
             as="h1"
             weight="semi-bold"
-            lineHeight="28px"
-            letterSpacing="-0.4px"
             color="heading-page"
           >
             투표 상세
@@ -158,10 +165,9 @@ export default function AdminPollDetailPage({
                 {poll.description}
               </Sans.T140>
 
-              {/* 투표 안건 리스트 */}
               <div className="flex w-full flex-col gap-3">
                 {poll.options.map((option) => (
-                  <AdminResultOptionItem
+                  <ResultOptionItem
                     key={option.label}
                     option={option}
                     isHighest={
@@ -171,25 +177,15 @@ export default function AdminPollDetailPage({
                 ))}
               </div>
 
-              {/* --- 하단 관리자 버튼 영역 --- */}
               <div className="flex w-full gap-[8px]">
-                <button
-                  type="button"
-                  className="flex h-[44px] w-[92px] cursor-pointer items-center justify-center rounded-[10px] border-none bg-[#848485] transition-transform active:scale-95"
-                >
-                  <span className="text-[16px] leading-[20px] font-semibold text-[#FFFFFF]">
-                    종료하기
-                  </span>
+                <button className="h-[44px] w-[92px] rounded-[10px] bg-[#848485] font-semibold text-[#FFFFFF]">
+                  종료하기
                 </button>
-
                 <button
-                  type="button"
-                  onClick={() => router.push(`/dashboard/poll/${pollId}/edit`)}
-                  className="flex h-[44px] w-[218px] cursor-pointer items-center justify-center rounded-[10px] border-none bg-[#A0191E] transition-transform active:scale-95"
+                  onClick={() => router.push(`/dashboard/poll/${poll.id}/edit`)}
+                  className="h-[44px] w-[218px] rounded-[10px] bg-[#A0191E] font-semibold text-[#FFFFFF]"
                 >
-                  <span className="text-[16px] leading-[20px] font-semibold text-[#FFFFFF]">
-                    수정하기
-                  </span>
+                  수정하기
                 </button>
               </div>
             </div>
