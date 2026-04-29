@@ -1,53 +1,87 @@
 'use client';
 
-import { createMockPolls, createMockUser } from '@/app/lib/mocks';
 import { Sans } from '@/app/ui/sans';
 import { useCurrentUserQuery } from '@/hooks/queries/useAuthQuery';
+import { pollQueryKeys, usePollsQuery } from '@/hooks/queries/usePollQuery';
+import { voteQueryKeys } from '@/hooks/queries/useVoteQuery';
 import { useTheme } from '@/providers/theme-provider';
-import type { Poll } from '@/types/poll';
-import type { UserProfile } from '@/types/user';
+import { getPollResults } from '@/services/polls';
+import { getMyVote } from '@/services/votes';
+import { useQueries } from '@tanstack/react-query';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 import Button from '@/components/common/button';
 import HistoryCard from '@/components/common/history-card';
 import PollCard from '@/components/common/poll-card';
 
+import {
+  getPollDeadline,
+  getResultText,
+  getThemeByUserProfile,
+  isPollStatus,
+  sumVotes,
+  toUserProfile,
+} from '../_utils/poll-display';
+
 export default function Home() {
-  const { data: authUser, isLoading, isError, error } = useCurrentUserQuery();
+  const router = useRouter();
+  const {
+    data: authUser,
+    isLoading: isAuthLoading,
+    isError,
+    error,
+  } = useCurrentUserQuery();
+  const { data: polls = [], isLoading: isPollsLoading } = usePollsQuery();
   const { setTheme } = useTheme();
-  const [user, setUser] = useState<UserProfile | null>(null);
-  const [votes, setVotes] = useState<Poll[] | null>(null);
+
+  const user = useMemo(() => {
+    return authUser ? toUserProfile(authUser) : null;
+  }, [authUser]);
+
+  const myVoteQueries = useQueries({
+    queries: polls.map((poll) => ({
+      queryKey: voteQueryKeys.myVote(poll.id),
+      queryFn: () => getMyVote(poll.id),
+      enabled: Boolean(authUser),
+      staleTime: 1000 * 60 * 3,
+      gcTime: 1000 * 60 * 10,
+    })),
+  });
+
+  const pollRows = polls.map((poll, index) => ({
+    poll,
+    myVote: myVoteQueries[index]?.data ?? null,
+  }));
+
+  const votedPollRows = pollRows.filter((row) => row.myVote !== null);
+
+  const resultQueries = useQueries({
+    queries: votedPollRows.map(({ poll }) => ({
+      queryKey: pollQueryKeys.detail(poll.id),
+      queryFn: () => getPollResults(poll.id),
+      enabled: Boolean(authUser),
+      staleTime: 1000 * 60 * 3,
+      gcTime: 1000 * 60 * 10,
+    })),
+  });
+
+  const resultsByPollId = new Map(
+    votedPollRows.map(({ poll }, index) => [
+      poll.id,
+      resultQueries[index]?.data?.results,
+    ]),
+  );
 
   useEffect(() => {
-    createMockUser().then(setUser);
-    createMockPolls().then((data) => {
-      const sanitizedData = data.map((v) => ({
-        ...v,
-        deadline: v.deadline.includes('T')
-          ? v.deadline
-          : `20${v.deadline.replace(/\./g, '-').replace(' ', 'T')}:00`,
-      }));
-      setVotes(sanitizedData);
-    });
-  }, []);
-
-  useEffect(() => {
-    if (user) {
-      if (user.role === 'EXECUTIVE') {
-        setTheme('theme-executive');
-      } else if (user.role === 'AGENT') {
-        setTheme('theme-agent');
-      } else {
-        setTheme('theme-default');
-      }
-    }
+    if (user) setTheme(getThemeByUserProfile(user));
   }, [user, setTheme]);
 
-  if (isLoading || !user || !votes) {
+  if (isAuthLoading || isPollsLoading || !user) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
         <Sans.T240
@@ -70,35 +104,50 @@ export default function Home() {
     );
   }
 
-  const filteredVotes =
-    user.role === 'EXECUTIVE' ? votes : votes.filter((v) => v.isMyVote);
-  const ongoingVotes = filteredVotes.filter((v) => v.isOngoing);
-  const completedVotes = filteredVotes.filter((v) => !v.isOngoing);
+  const ongoingVotes = pollRows.filter(({ poll }) =>
+    isPollStatus(poll, 'continuing'),
+  );
+  // TODO: 대표자 화면에 대리인 투표까지 합치려면 백엔드에서
+  // original_user_id 기준 대리인 vote 조회 API를 제공해야 함.
+  const completedVotes = pollRows.filter(
+    ({ poll, myVote }) =>
+      isPollStatus(poll, 'completed') &&
+      (user.role === 'EXECUTIVE' || myVote !== null),
+  );
   const displayedCompletedVotes = completedVotes.slice(0, 3);
+
+  const handlePollAction = (pollId: number) => {
+    if (user.role === 'EXECUTIVE') {
+      router.push(`/dashboard/poll/${pollId}`);
+      return;
+    }
+
+    router.push(`/poll/${pollId}`);
+  };
 
   return (
     <div className="min-h-screen w-full bg-background">
-      {/* --- 상단 프로필 영역 --- */}
-      <header className="relative h-86.25 w-full rounded-b-[20px] bg-profile shadow-[0_0_60px_rgba(0,0,0,0.04)]">
-        {' '}
-        {/* h-[345px] -> 86.25 */}
-        <div className="absolute top-15.5 flex h-11 w-full items-center gap-3 px-5">
-          {' '}
-          {/* top-15.5(62px), h-11(44px), gap-3(12px), px-5(20px) */}
+      <header className="relative h-[274px] w-full rounded-b-[20px] bg-profile shadow-[0_0_60px_rgba(0,0,0,0.04)]">
+        <div className="absolute top-4 flex h-11 w-full items-center gap-3 px-5">
           <div className="flex h-7 items-center gap-4">
-            {' '}
-            {/* h-7(28px), gap-4(16px) */}
-            <Image
-              src="/icons/back.svg"
-              alt="back"
-              width={24}
-              height={24}
-              className={
-                user.role === 'REPRESENTATIVE'
-                  ? 'brightness-0 invert'
-                  : 'opacity-100'
-              }
-            />
+            <button
+              type="button"
+              aria-label="홈으로 이동"
+              onClick={() => router.push('/')}
+              className="flex size-6 items-center justify-center"
+            >
+              <Image
+                src="/icons/back.svg"
+                alt="back"
+                width={24}
+                height={24}
+                className={
+                  user.usesExecutiveTheme || user.role === 'REPRESENTATIVE'
+                    ? 'brightness-0 invert'
+                    : 'opacity-100'
+                }
+              />
+            </button>
             <Sans.T200
               as="h2"
               color="profile-name"
@@ -109,15 +158,9 @@ export default function Home() {
             </Sans.T200>
           </div>
         </div>
-        <div className="absolute top-32.5 right-5 left-5 flex flex-col gap-4">
-          {' '}
-          {/* top-32.5(130px), right-5, left-5, gap-4(16px) */}
+        <div className="absolute top-22 right-5 left-5 flex flex-col gap-4">
           <div className="flex h-13 w-full items-center gap-4 px-2">
-            {' '}
-            {/* h-13(52px), gap-4(16px), px-2(8px) */}
-            <div className="flex flex-grow flex-col gap-1">
-              {' '}
-              {/* gap-1(4px) */}
+            <div className="flex flex-grow flex-col gap-2">
               <div className="flex items-center justify-between">
                 <Sans.T240
                   as="h1"
@@ -128,10 +171,8 @@ export default function Home() {
                   {user.name}
                 </Sans.T240>
 
-                {user.role === 'AGENT' && (
+                {(user.role === 'AGENT' || user.showsExecutiveBadge) && (
                   <div className="flex items-center justify-center rounded bg-badge px-1.5 py-0.5">
-                    {' '}
-                    {/* rounded-[4px] -> rounded(4px), px-1.5(6px), py-0.5(2px) */}
                     <Sans.T120
                       as="span"
                       weight="medium"
@@ -139,14 +180,12 @@ export default function Home() {
                       lineHeight="17px"
                       letterSpacing="-0.1px"
                     >
-                      대리인
+                      {user.showsExecutiveBadge ? '임원진' : '대리인'}
                     </Sans.T120>
                   </div>
                 )}
               </div>
               <div className="flex items-center gap-1">
-                {' '}
-                {/* gap-1(4px) */}
                 <Sans.T160
                   as="span"
                   color="profile-support"
@@ -171,37 +210,28 @@ export default function Home() {
               </div>
             </div>
           </div>
-          <div className="rounded-4 flex w-full flex-col gap-5 bg-background-profile-section p-6">
-            {' '}
-            {/* gap-5(20px), rounded-4(16px), p-6(24px) */}
+          <div className="flex w-full flex-col gap-5 rounded-[16px] bg-background-profile-section p-6">
             <div className="flex flex-col gap-3">
               <ProfileRow
-                label="학과"
+                label="분과"
                 value={user.department}
               />
               <ProfileRow
-                label="학번"
+                label={user.showsExecutiveBadge ? '권한' : '대표자'}
                 value={user.studentId}
               />
-              <ProfileRow
+              {/* <ProfileRow
                 label="재휴학"
                 value={user.status}
-              />
+              /> */}
             </div>
           </div>
         </div>
       </header>
 
-      {/* --- 하단 메인 영역 --- */}
       <main className="flex w-full flex-col gap-10 px-5 py-6">
-        {' '}
-        {/* gap-10(40px), px-5(20px), py-6(24px) */}
         <section className="flex flex-col gap-4">
-          {' '}
-          {/* gap-4(16px) */}
           <div className="flex h-10 items-center">
-            {' '}
-            {/* h-10(40px) */}
             <Sans.T240
               as="h2"
               color="heading-page"
@@ -211,23 +241,36 @@ export default function Home() {
               </span>
             </Sans.T240>
           </div>
-          {ongoingVotes.map((vote) => (
-            <PollCard
-              key={vote.id}
-              title={vote.title}
-              deadline={vote.deadline}
-              statistics={{
-                quota: vote.totalParticipants || 0,
-                votes: vote.currentCount || 0,
-              }}
-              myVote={vote.myVote}
-              isAdmin={user.role === 'EXECUTIVE'}
-            />
-          ))}
+          {ongoingVotes.length > 0 ? (
+            ongoingVotes.map(({ poll, myVote }) => {
+              const results = resultsByPollId.get(poll.id);
+              const voteCount = sumVotes(results);
+
+              return (
+                <PollCard
+                  key={poll.id}
+                  title={poll.question}
+                  deadline={getPollDeadline(poll)}
+                  statistics={{
+                    quota: voteCount,
+                    votes: voteCount,
+                  }}
+                  myVote={myVote?.selected}
+                  isAdmin={user.role === 'EXECUTIVE'}
+                  onAction={() => handlePollAction(poll.id)}
+                />
+              );
+            })
+          ) : (
+            <Sans.T160
+              as="p"
+              color="title-subvalue"
+            >
+              진행 중인 내 투표가 없습니다.
+            </Sans.T160>
+          )}
         </section>
         <section className="flex flex-col gap-4 pb-10">
-          {' '}
-          {/* gap-4(16px), pb-10(40px) */}
           <div className="flex h-10 items-center justify-between">
             <Sans.T240
               as="h2"
@@ -243,33 +286,54 @@ export default function Home() {
                 alt="more"
                 width={32}
                 height={32}
-                className="cursor-pointer opacity-20"
+                className={
+                  user.usesExecutiveTheme
+                    ? 'cursor-pointer brightness-0 invert'
+                    : 'cursor-pointer'
+                }
               />
             </Link>
           </div>
-          {displayedCompletedVotes.map((vote) => (
-            <HistoryCard
-              key={vote.id}
-              title={vote.title}
-              deadline={vote.deadline}
-              myVote={vote.myVote}
-              statistics={{
-                quota: vote.attendanceTotal || 0,
-                votes: vote.attendanceCount || 0,
-              }}
-              results={`${vote.resultStatus}(${vote.resultRate}%)`}
-              isAgent={vote.isAgentVote}
-            />
-          ))}
-          {completedVotes.length > 3 && (
+          {displayedCompletedVotes.length > 0 ? (
+            displayedCompletedVotes.map(({ poll, myVote }) => {
+              const results = resultsByPollId.get(poll.id);
+              const voteCount = sumVotes(results);
+
+              return (
+                <HistoryCard
+                  key={poll.id}
+                  title={poll.question}
+                  deadline={getPollDeadline(poll)}
+                  myVote={myVote?.selected ?? '-'}
+                  statistics={{
+                    quota: voteCount,
+                    votes: voteCount,
+                  }}
+                  results={getResultText(results)}
+                  isAgent={user.role === 'AGENT'}
+                  badgeLabel={user.showsExecutiveBadge ? '임원진' : undefined}
+                  href={`/poll/${poll.id}/result`}
+                />
+              );
+            })
+          ) : (
+            <Sans.T160
+              as="p"
+              color="title-subvalue"
+            >
+              완료된 내 투표가 없습니다.
+            </Sans.T160>
+          )}
+          {completedVotes.length >= 3 && (
             <Link
               href="/completed-votes"
               className="w-full"
             >
               <div className="mt-1 flex flex-col">
-                {' '}
-                {/* mt-1(4px) */}
-                <Button content="완료된 투표 더보기" />
+                <Button
+                  content="완료된 투표 더보기"
+                  size="medium"
+                />
               </div>
             </Link>
           )}
