@@ -76,7 +76,7 @@ export default function AdminPollEditPage({
   const { mutateAsync: updatePoll, isPending: isUpdatePending } = useMutation({
     mutationFn: (updates: {
       question: string;
-      descriptions?: string;
+      description?: string;
       options?: string[];
     }) => editPoll(Number(params.id), updates),
     onSuccess: () => {
@@ -103,7 +103,7 @@ export default function AdminPollEditPage({
     try {
       await updatePoll({
         question: trimmedQuestion,
-        descriptions: trimmedDescription,
+        description: trimmedDescription,
         // 현재 API 명세상 옵션 수정이 필요 없다면 기존 값 유지 (생략 가능)
         options: data?.poll.options,
       });

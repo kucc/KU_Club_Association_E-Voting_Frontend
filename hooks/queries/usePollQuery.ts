@@ -52,15 +52,17 @@ export const useCreatePollMutation = () => {
   return useMutation({
     mutationFn: ({
       question,
+      description,
       options,
       sort_order,
       ended_at,
     }: {
       question: string;
+      description: string;
       options: string[];
       sort_order: number;
       ended_at: string;
-    }) => createPoll(question, options, sort_order, ended_at),
+    }) => createPoll(question, description, options, sort_order, ended_at),
     onSuccess: async () => {
       await queryClient.invalidateQueries({
         queryKey: pollQueryKeys.lists,
