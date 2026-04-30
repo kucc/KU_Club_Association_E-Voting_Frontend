@@ -28,7 +28,7 @@ export default function Page() {
 
   const onSuccess = (user: User) => {
     setTheme(getThemeByUserProfile(toUserProfile(user)));
-    router.push('/');
+    router.push('/board');
   };
 
   return (

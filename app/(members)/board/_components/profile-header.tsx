@@ -1,19 +1,42 @@
+'use client';
+
 import { Sans } from '@/app/ui/sans';
+import { useSignOutMutation } from '@/hooks/queries/useAuthQuery';
+import { useTheme } from '@/providers/theme-provider';
 import type { UserProfile } from '@/types/user';
 
-import Image from 'next/image';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+
+import Button from '@/components/common/button';
 
 type Props = Readonly<{
   user: UserProfile;
   onBack: () => void;
 }>;
 
-export default function ProfileHeader({ user, onBack }: Props) {
+export default function ProfileHeader({ user }: Props) {
+  const { mutate: _signOut } = useSignOutMutation();
+  const { setTheme } = useTheme();
+
+  const router = useRouter();
+
+  const signOut = () => {
+    setTheme('theme-default');
+    _signOut();
+    router.push('/signin');
+  };
+
   return (
-    <header className="relative h-[320px] w-full rounded-b-[20px] bg-profile shadow-[0_0_60px_rgba(0,0,0,0.04)]">
+    <header
+      className="relative h-[380px] w-full rounded-b-[20px] bg-profile shadow-[0_0_60px_rgba(0,0,0,0.04)]"
+      style={{
+        height: user.role === 'EXECUTIVE' ? '380px' : '320px',
+      }}
+    >
       <div className="absolute top-15.5 flex h-11 w-full items-center gap-3 px-5">
-        <div className="flex h-7 items-center gap-4">
-          <button
+        <div className="flex h-7 w-full items-center justify-between gap-4">
+          {/* <button
             type="button"
             aria-label="홈으로 이동"
             onClick={onBack}
@@ -30,7 +53,7 @@ export default function ProfileHeader({ user, onBack }: Props) {
                   : 'opacity-100'
               }
             />
-          </button>
+          </button> */}
           <Sans.T200
             as="h2"
             color="profile-name"
@@ -39,6 +62,17 @@ export default function ProfileHeader({ user, onBack }: Props) {
               내 투표
             </span>
           </Sans.T200>
+          <div
+            className="cursor-pointer"
+            onClick={() => signOut()}
+          >
+            <Sans.T160
+              as="h2"
+              color="profile-name"
+            >
+              로그아웃
+            </Sans.T160>
+          </div>
         </div>
       </div>
       <div className="absolute top-[134px] right-5 left-5 flex flex-col gap-4">
@@ -109,6 +143,14 @@ export default function ProfileHeader({ user, onBack }: Props) {
             /> */}
           </div>
         </div>
+        {user.role === 'EXECUTIVE' && (
+          <Link
+            href="/dashboard/poll/create"
+            className="mt-2 block w-full"
+          >
+            <Button content="투표 만들기" />
+          </Link>
+        )}
       </div>
     </header>
   );
