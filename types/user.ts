@@ -5,6 +5,8 @@ export type User = {
   created_at?: string;
   isAdmin: boolean;
   isSubstitute?: boolean;
+  is_admin?: boolean;
+  is_substitute?: boolean;
   original_user_id: number | null;
 };
 

@@ -8,7 +8,7 @@ import { getPollResults } from '@/services/polls';
 import { getMyVote } from '@/services/votes';
 import { useQueries } from '@tanstack/react-query';
 
-import { useEffect, useMemo } from 'react';
+import { useLayoutEffect, useMemo } from 'react';
 
 import {
   getThemeByUserProfile,
@@ -16,12 +16,7 @@ import {
 } from '../(members)/_utils/poll-display';
 
 export const useMyPageData = () => {
-  const {
-    data: authUser,
-    isLoading: isAuthLoading,
-    isError,
-    error,
-  } = useCurrentUserQuery();
+  const { data: authUser, isError, error } = useCurrentUserQuery();
   const { data: polls = [], isLoading: isPollsLoading } = usePollsQuery();
   const { setTheme } = useTheme();
 
@@ -32,7 +27,7 @@ export const useMyPageData = () => {
 
   const myVoteQueries = useQueries({
     queries: polls.map((poll) => ({
-      queryKey: voteQueryKeys.myVote(poll.id),
+      queryKey: voteQueryKeys.myVote(poll.id, authUser?.id),
       queryFn: () => getMyVote(poll.id),
       enabled: Boolean(authUser),
       staleTime: 1000 * 60 * 3,
@@ -65,7 +60,7 @@ export const useMyPageData = () => {
     ]),
   );
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (user) setTheme(getThemeByUserProfile(user));
   }, [user, setTheme]);
 
@@ -73,7 +68,7 @@ export const useMyPageData = () => {
     authUser,
     error,
     isError,
-    isLoading: isAuthLoading || isPollsLoading || !user,
+    isLoading: !user || (isPollsLoading && polls.length === 0),
     isManagementAdmin,
     pollRows,
     resultsByPollId,

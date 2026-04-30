@@ -44,6 +44,7 @@ type CreatePollResponse = ApiSuccessResponse<{
 type EditPollRequest = {
   id: number;
   question?: string;
+  description?: string;
   options?: string[];
 };
 
@@ -118,7 +119,7 @@ export const createPoll = async (
 
 export const editPoll = async (
   id: number,
-  updates: { question?: string; options?: string[] },
+  updates: { question?: string; description?: string; options?: string[] },
 ): Promise<Record<string, unknown>> => {
   try {
     const { data } = await apiClient.patch<EditPollResponse>(

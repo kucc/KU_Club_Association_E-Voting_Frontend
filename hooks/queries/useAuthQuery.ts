@@ -28,10 +28,10 @@ export const useSignInMutation = () => {
       username: string;
       password: string;
     }) => signIn(username, password),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({
-        queryKey: authQueryKeys.currentUser,
-      });
+    onSuccess: (user) => {
+      queryClient.removeQueries({ queryKey: ['votes'] });
+      queryClient.removeQueries({ queryKey: ['polls'] });
+      queryClient.setQueryData(authQueryKeys.currentUser, user);
     },
   });
 };
@@ -45,6 +45,8 @@ export const useSignOutMutation = () => {
       queryClient.removeQueries({
         queryKey: authQueryKeys.currentUser,
       });
+      queryClient.removeQueries({ queryKey: ['votes'] });
+      queryClient.removeQueries({ queryKey: ['polls'] });
     },
   });
 };

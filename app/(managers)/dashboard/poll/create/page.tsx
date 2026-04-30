@@ -45,7 +45,7 @@ export default function AdminPollCreatePage() {
 
       alert('투표가 성공적으로 생성되었습니다! 목록 페이지로 이동합니다.');
 
-      router.push('/dashboard/poll'); // 성공 시 목록 페이지로 이동
+      router.push('/dashboard'); // 성공 시 목록 페이지로 이동
     } catch (error) {
       console.error('생성 실패:', error);
 
@@ -96,7 +96,8 @@ export default function AdminPollCreatePage() {
 
             <div className="flex flex-col gap-2">
               <textarea
-                placeholder="투표 설명을 작성하세요 (최대 500자)"
+                placeholder="투표 설명을 작성하세요 (최대 500자)
+                ※ 현재 설명 저장은 지원되지 않습니다."
                 value={description}
                 onChange={(e) =>
                   setDescription(e.target.value.slice(0, MAX_LENGTH))

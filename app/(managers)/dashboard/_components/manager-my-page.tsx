@@ -9,8 +9,10 @@ import HistoryCard from '@/components/common/history-card';
 import PollCard from '@/components/common/poll-card';
 
 import {
+  getEligibleVoterCount,
   getPollDeadline,
   getResultText,
+  getThemeByUserProfile,
   isPollStatus,
   sumVotes,
 } from '../../../(members)/_utils/poll-display';
@@ -39,9 +41,12 @@ export default function ManagerMyPage({
     isPollStatus(poll, 'completed'),
   );
   const displayedCompletedVotes = completedVotes.slice(0, 3);
+  const eligibleVoterCount = getEligibleVoterCount();
 
   return (
-    <div className="min-h-screen w-full bg-background">
+    <div
+      className={`${getThemeByUserProfile(user)} min-h-screen w-full bg-background`}
+    >
       <ProfileHeader
         user={user}
         onBack={onBack}
@@ -70,7 +75,7 @@ export default function ManagerMyPage({
                   title={poll.question}
                   deadline={getPollDeadline(poll)}
                   statistics={{
-                    quota: voteCount,
+                    quota: eligibleVoterCount,
                     votes: voteCount,
                   }}
                   isAdmin
@@ -119,12 +124,13 @@ export default function ManagerMyPage({
                   deadline={getPollDeadline(poll)}
                   myVote="-"
                   statistics={{
-                    quota: voteCount,
+                    quota: eligibleVoterCount,
                     votes: voteCount,
                   }}
                   results={getResultText(results)}
                   badgeLabel="임원진"
                   hideMyVote
+                  href={`/dashboard/poll/${poll.id}`}
                 />
               );
             })

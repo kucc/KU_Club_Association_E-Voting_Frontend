@@ -5,6 +5,7 @@ export type PollResponse = {
   id: number;
   created_by: number;
   question: string;
+  description?: string | null;
   options: string[];
   status: PollStatus;
   started_at: string | null;

@@ -1,14 +1,25 @@
 'use client';
 
+import {
+  getEligibleVoterCount,
+  getThemeByUserProfile,
+  toUserProfile,
+} from '@/app/(members)/_utils/poll-display';
 import { Sans } from '@/app/ui/sans';
 import {
   useCurrentUserQuery,
   useSignOutMutation,
 } from '@/hooks/queries/useAuthQuery';
-import { usePollsQuery } from '@/hooks/queries/usePollQuery';
+import {
+  pollQueryKeys,
+  usePollsQuery,
+  useStartPollMutation,
+} from '@/hooks/queries/usePollQuery';
 import { useTheme } from '@/providers/theme-provider';
+import { getPollResults } from '@/services/polls';
+import { useQueries } from '@tanstack/react-query';
 
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 
 import Image from 'next/image';
 import Link from 'next/link';
@@ -19,17 +30,44 @@ import ScheduledCard from '@/components/common/scheduled-card';
 export default function Home() {
   const { data, isSuccess } = useCurrentUserQuery();
   const polls = usePollsQuery();
+  const startPollMutation = useStartPollMutation();
 
   const { setTheme } = useTheme();
   const { mutate: _signOut } = useSignOutMutation();
 
-  const isManager = isSuccess && data?.isAdmin;
+  const userProfile = useMemo(() => {
+    return data ? toUserProfile(data) : null;
+  }, [data]);
+  const isManagementAdmin = userProfile?.canOpenMemberResultPage === false;
+  const usesExecutiveTheme = Boolean(userProfile?.usesExecutiveTheme);
+  const canStartPoll =
+    isSuccess &&
+    ['president', 'vicepresident', 'vice_president', 'admin'].includes(
+      data.username,
+    );
 
   const ongoingVotes = (polls.data || []).filter(
     (v) => v.status === 'continuing',
   );
   const scheduledVotes = (polls.data || []).filter(
     (v) => v.status === 'pending',
+  );
+  const eligibleVoterCount = getEligibleVoterCount();
+
+  const ongoingPollResultQueries = useQueries({
+    queries: ongoingVotes.map((vote) => ({
+      queryKey: pollQueryKeys.detail(vote.id),
+      queryFn: () => getPollResults(vote.id),
+      enabled: isSuccess,
+      staleTime: 1000 * 60 * 3,
+      gcTime: 1000 * 60 * 10,
+    })),
+  });
+  const resultsByPollId = new Map(
+    ongoingVotes.map((vote, index) => [
+      vote.id,
+      ongoingPollResultQueries[index]?.data?.results,
+    ]),
   );
 
   const signOut = () => {
@@ -38,10 +76,13 @@ export default function Home() {
   };
 
   useEffect(() => {
-    if (!isSuccess) return;
+    if (!userProfile) {
+      setTheme('theme-default');
+      return;
+    }
 
-    if (isManager) setTheme('theme-executive');
-  }, [isSuccess, isManager, setTheme]);
+    setTheme(getThemeByUserProfile(userProfile));
+  }, [setTheme, userProfile]);
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -58,7 +99,7 @@ export default function Home() {
               width={28}
               height={28}
               className={
-                isManager
+                usesExecutiveTheme
                   ? 'cursor-pointer'
                   : 'cursor-pointer brightness-0 invert'
               }
@@ -70,7 +111,7 @@ export default function Home() {
                 alt="profile"
                 width={28}
                 height={28}
-                className={isManager ? '' : 'brightness-0 invert'}
+                className={usesExecutiveTheme ? '' : 'brightness-0 invert'}
               />
             </Link>
           </div>
@@ -89,7 +130,7 @@ export default function Home() {
         {/* 타이틀 및 문구 영역 */}
         <div
           className={`${
-            isSuccess && !isManager ? 'mt-14.5' : ''
+            isSuccess && !usesExecutiveTheme ? 'mt-14.5' : ''
           } mt-45 flex w-full flex-col items-start justify-center gap-2.5 px-5 py-2.5`}
         >
           <Sans.T400
@@ -176,20 +217,27 @@ export default function Home() {
               >
                 지금 진행 중인 투표
               </Sans.T240>
-              {ongoingVotes.map((vote) => (
-                <PollCard
-                  key={vote.id}
-                  id={vote.id}
-                  title={vote.question}
-                  deadline={vote.ended_at || ''}
-                  statistics={{
-                    quota: 0,
-                    votes: 0,
-                  }}
-                  // myVote={vote.myVote}
-                  isAdmin={isManager}
-                />
-              ))}
+              {ongoingVotes.map((vote) => {
+                const voteCount =
+                  resultsByPollId
+                    .get(vote.id)
+                    ?.reduce((total, result) => total + result.count, 0) ?? 0;
+
+                return (
+                  <PollCard
+                    key={vote.id}
+                    id={vote.id}
+                    title={vote.question}
+                    deadline={vote.ended_at || ''}
+                    statistics={{
+                      quota: eligibleVoterCount,
+                      votes: voteCount,
+                    }}
+                    // myVote={vote.myVote}
+                    isAdmin={isManagementAdmin}
+                  />
+                );
+              })}
             </section>
           )}
 
@@ -208,6 +256,12 @@ export default function Home() {
                     key={vote.id}
                     title={vote.question}
                     openingTime={vote.ended_at || ''}
+                    isAdmin={canStartPoll}
+                    isStarting={
+                      startPollMutation.isPending &&
+                      startPollMutation.variables === vote.id
+                    }
+                    onStart={() => startPollMutation.mutate(vote.id)}
                   />
                 ))}
               </div>

@@ -76,7 +76,7 @@ export default function HistoryCard({
   return (
     <Link
       href={href}
-      className="block"
+      className="block cursor-pointer"
     >
       {card}
     </Link>
