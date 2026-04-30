@@ -91,7 +91,7 @@ export default function Home() {
     <div className="min-h-screen bg-background pb-20">
       <section
         className={`flex ${
-          !isSuccess ? 'h-188' : 'h-131.5'
+          !isSuccess ? 'h-138' : 'h-81.5'
         } w-full flex-col rounded-b-[20px] bg-hero-card pt-15.5 shadow-[0_0_60px_rgba(0,0,0,0.04)] transition-all duration-300`}
       >
         {isSuccess ? (
@@ -204,7 +204,7 @@ export default function Home() {
 
         {/* 로그인 전 버튼 */}
         {!isSuccess && (
-          <div className="mt-51.25 w-full px-5">
+          <div className="mt-5 w-full px-5">
             <Link href="/signin">
               <button className="flex h-13 w-full cursor-pointer items-center justify-center rounded-[10px] bg-label-home transition-transform active:scale-[0.98]">
                 <Sans.T200
