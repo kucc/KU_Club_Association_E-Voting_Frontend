@@ -16,7 +16,8 @@ import {
 
 export const voteQueryKeys = {
   results: (pollId: number) => ['votes', 'results', pollId] as const,
-  myVote: (pollId: number) => ['votes', 'myVote', pollId] as const,
+  myVote: (pollId: number, userId?: number) =>
+    ['votes', 'myVote', pollId, userId ?? 'anonymous'] as const,
 };
 
 export const useVoteResultsQuery = (pollId: number) => {
@@ -34,11 +35,11 @@ export const useVoteResultsQuery = (pollId: number) => {
   });
 };
 
-export const useMyVoteQuery = (pollId: number) => {
+export const useMyVoteQuery = (pollId: number, userId?: number) => {
   return useQuery<Vote | null>({
-    queryKey: voteQueryKeys.myVote(pollId),
+    queryKey: voteQueryKeys.myVote(pollId, userId),
     queryFn: () => getMyVote(pollId),
-    enabled: Number.isFinite(pollId),
+    enabled: Number.isFinite(pollId) && userId !== undefined,
     staleTime: 1000 * 60 * 3,
     gcTime: 1000 * 60 * 10,
     placeholderData: keepPreviousData,
@@ -56,7 +57,7 @@ export const useCastVoteMutation = (pollId: number) => {
         queryKey: voteQueryKeys.results(pollId),
       });
       await queryClient.invalidateQueries({
-        queryKey: voteQueryKeys.myVote(pollId),
+        queryKey: ['votes', 'myVote', pollId],
       });
     },
   });
@@ -72,7 +73,7 @@ export const useEditVoteMutation = (pollId: number) => {
         queryKey: voteQueryKeys.results(pollId),
       });
       await queryClient.invalidateQueries({
-        queryKey: voteQueryKeys.myVote(pollId),
+        queryKey: ['votes', 'myVote', pollId],
       });
     },
   });

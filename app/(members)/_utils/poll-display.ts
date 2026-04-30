@@ -2,6 +2,8 @@ import type { PollResponse, PollStatus } from '@/types/poll';
 import type { User, UserProfile } from '@/types/user';
 
 import {
+  ADMIN_ACCOUNTS,
+  CLUB_ACCOUNTS,
   getAdminAccountByUsername,
   getClubAccountByUsername,
 } from '../_data/user-directory';
@@ -15,10 +17,19 @@ const getRepresentativeClubName = (username: string): string => {
   return username.trim().replace(/_sub$/i, '').toUpperCase();
 };
 
+const getRepresentativeUsername = (username: string): string => {
+  return username.trim().replace(/_sub$/i, '');
+};
+
+const isSubstituteUser = (user: User): boolean => {
+  return Boolean(user.isSubstitute) || /_sub$/i.test(user.username);
+};
+
 export const toUserProfile = (user: User): UserProfile => {
+  const isSubstitute = isSubstituteUser(user);
   const role = user.isAdmin
     ? 'EXECUTIVE'
-    : user.isSubstitute
+    : isSubstitute
       ? 'AGENT'
       : 'REPRESENTATIVE';
   const adminAccount = getAdminAccountByUsername(user.username);
@@ -38,7 +49,10 @@ export const toUserProfile = (user: User): UserProfile => {
     };
   }
 
-  const clubAccount = getClubAccountByUsername(user.username);
+  const representativeUsername = getRepresentativeUsername(user.username);
+  const clubAccount =
+    getClubAccountByUsername(user.username) ??
+    getClubAccountByUsername(representativeUsername);
   const clubName =
     clubAccount?.clubName ?? getRepresentativeClubName(user.username);
 
@@ -46,7 +60,7 @@ export const toUserProfile = (user: User): UserProfile => {
     name: user.username,
     role,
     club: '동아리',
-    position: user.isAdmin ? '임원진' : user.isSubstitute ? '대리인' : '대표자',
+    position: user.isAdmin ? '임원진' : isSubstitute ? '대리인' : '대표자',
     department: clubAccount?.division ?? '-',
     studentId: clubName,
     status: '-',
@@ -69,6 +83,19 @@ export const isPollStatus = (poll: PollResponse, status: PollStatus): boolean =>
 
 export const sumVotes = (results: PollResultItem[] | undefined): number => {
   return results?.reduce((total, result) => total + result.count, 0) ?? 0;
+};
+
+export const getEligibleVoterCount = (): number => {
+  const clubVoters = new Set(
+    CLUB_ACCOUNTS.map((account) => account.clubName.trim()),
+  );
+  const adminVoters = new Set(
+    ADMIN_ACCOUNTS.filter((account) => account.authority === '투표자').map(
+      (account) => `${account.position}:${account.division}`,
+    ),
+  );
+
+  return clubVoters.size + adminVoters.size;
 };
 
 export const getResultText = (

@@ -1,5 +1,9 @@
 'use client';
 
+import {
+  getThemeByUserProfile,
+  toUserProfile,
+} from '@/app/(members)/_utils/poll-display';
 import { Sans } from '@/app/ui/sans';
 import { useSignInMutation } from '@/hooks/queries/useAuthQuery';
 import { useTheme } from '@/providers/theme-provider';
@@ -23,14 +27,7 @@ export default function Page() {
   const { setTheme } = useTheme();
 
   const onSuccess = (user: User) => {
-    if (user.isAdmin) {
-      setTheme('theme-executive');
-    }
-
-    if (user.isSubstitute) {
-      setTheme('theme-agent');
-    }
-
+    setTheme(getThemeByUserProfile(toUserProfile(user)));
     router.push('/');
   };
 
@@ -76,7 +73,7 @@ export default function Page() {
       >
         <Input
           placeholder="아이디를 입력해주세요."
-          title="아이디 또는 이메일"
+          title="아이디"
           name="username"
         />
         <Input
