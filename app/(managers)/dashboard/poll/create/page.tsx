@@ -36,6 +36,8 @@ export default function AdminPollCreatePage() {
       await createPoll({
         question, // 제목
 
+        description, // 설명
+
         options: ['찬성', '반대'], // 우선 기본값 (나중에 UI 추가 가능)
 
         sort_order: 1, // 정렬 순서
@@ -96,8 +98,7 @@ export default function AdminPollCreatePage() {
 
             <div className="flex flex-col gap-2">
               <textarea
-                placeholder="투표 설명을 작성하세요 (최대 500자)
-                ※ 현재 설명 저장은 지원되지 않습니다."
+                placeholder="투표 설명을 작성하세요 (최대 500자)"
                 value={description}
                 onChange={(e) =>
                   setDescription(e.target.value.slice(0, MAX_LENGTH))

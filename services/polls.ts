@@ -22,6 +22,7 @@ type PollResultsResponse = ApiSuccessResponse<{
 
 type CreatePollRequest = {
   question: string;
+  description?: string;
   options: string[];
   sort_order: number;
   ended_at: string;
@@ -96,6 +97,7 @@ export const getPollResults = async (
 
 export const createPoll = async (
   question: string,
+  description: string,
   options: string[],
   sort_order: number,
   ended_at: string,
@@ -105,6 +107,7 @@ export const createPoll = async (
       '/api/polls/create-poll',
       {
         question,
+        description,
         options,
         sort_order,
         ended_at,

@@ -50,17 +50,20 @@ export const useCreatePollMutation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({
-      question,
-      options,
-      sort_order,
-      ended_at,
-    }: {
+    mutationFn: (data: {
       question: string;
+      description: string;
       options: string[];
       sort_order: number;
       ended_at: string;
-    }) => createPoll(question, options, sort_order, ended_at),
+    }) =>
+      createPoll(
+        data.question,
+        data.description,
+        data.options,
+        data.sort_order,
+        data.ended_at,
+      ),
     onSuccess: async () => {
       await queryClient.invalidateQueries({
         queryKey: pollQueryKeys.lists,
