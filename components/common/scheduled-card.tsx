@@ -22,7 +22,7 @@ export default function ScheduledCard({
 }: Props) {
   const labels: LabelType[] = [
     {
-      name: '시작 시간',
+      name: '마감 기한',
       content: formatDate(openingTime),
     },
   ];
