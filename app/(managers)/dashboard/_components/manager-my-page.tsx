@@ -1,8 +1,10 @@
 import { Sans } from '@/app/ui/sans';
+import { useStartPollMutation } from '@/hooks/queries/usePollQuery';
 import type { UserProfile } from '@/types/user';
 
 import HistoryCard from '@/components/common/history-card';
 import PollCard from '@/components/common/poll-card';
+import ScheduledCard from '@/components/common/scheduled-card';
 
 import {
   getEligibleVoterCount,
@@ -36,8 +38,11 @@ export default function ManagerMyPage({
   const completedVotes = pollRows.filter(({ poll }) =>
     isPollStatus(poll, 'completed'),
   );
+  const scheduledVotes = pollRows.filter((v) => v.poll.status === 'pending');
   const displayedCompletedVotes = completedVotes;
   const eligibleVoterCount = getEligibleVoterCount();
+
+  const startPollMutation = useStartPollMutation();
 
   return (
     <div
@@ -152,6 +157,32 @@ export default function ManagerMyPage({
               </div>
             </Link>
           )} */}
+          {scheduledVotes.length > 0 && (
+            <section className="flex flex-col gap-4">
+              <Sans.T240
+                as="h2"
+                color="heading-page"
+                weight="bold"
+              >
+                예정된 투표
+              </Sans.T240>
+              <div className="flex flex-col gap-4">
+                {scheduledVotes.map((vote) => (
+                  <ScheduledCard
+                    key={vote.poll.id}
+                    title={vote.poll.question}
+                    openingTime={vote.poll.ended_at || ''}
+                    isAdmin={user.role === 'EXECUTIVE'}
+                    isStarting={
+                      startPollMutation.isPending &&
+                      startPollMutation.variables === vote.poll.id
+                    }
+                    onStart={() => startPollMutation.mutate(vote.poll.id)}
+                  />
+                ))}
+              </div>
+            </section>
+          )}
         </section>
       </main>
     </div>
