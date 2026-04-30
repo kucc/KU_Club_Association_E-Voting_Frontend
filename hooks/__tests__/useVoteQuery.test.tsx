@@ -59,7 +59,7 @@ describe('hooks/queries/useVoteQuery', () => {
     });
 
     const { Wrapper } = createQueryWrapper();
-    const { result } = renderHook(() => useMyVoteQuery(1), {
+    const { result } = renderHook(() => useMyVoteQuery(1, 1), {
       wrapper: Wrapper,
     });
 
@@ -75,7 +75,7 @@ describe('hooks/queries/useVoteQuery', () => {
     mockedVotesService.getMyVote.mockResolvedValue(null);
 
     const { Wrapper } = createQueryWrapper();
-    const { result } = renderHook(() => useMyVoteQuery(1), {
+    const { result } = renderHook(() => useMyVoteQuery(1, 1), {
       wrapper: Wrapper,
     });
 
@@ -88,7 +88,7 @@ describe('hooks/queries/useVoteQuery', () => {
 
   test('useMyVoteQuery: pollId가 유효하지 않으면 쿼리가 실행되지 않는다', async () => {
     const { Wrapper } = createQueryWrapper();
-    const { result } = renderHook(() => useMyVoteQuery(NaN), {
+    const { result } = renderHook(() => useMyVoteQuery(NaN, 1), {
       wrapper: Wrapper,
     });
 

@@ -8,9 +8,18 @@ import Title from './card/title';
 type Props = Readonly<{
   title: string;
   openingTime: string; // ISO 8601
+  isAdmin?: boolean;
+  isStarting?: boolean;
+  onStart?: () => void;
 }>;
 
-export default function ScheduledCard({ title, openingTime }: Props) {
+export default function ScheduledCard({
+  title,
+  openingTime,
+  isAdmin,
+  isStarting,
+  onStart,
+}: Props) {
   const labels: LabelType[] = [
     {
       name: '시작 시간',
@@ -25,8 +34,11 @@ export default function ScheduledCard({ title, openingTime }: Props) {
       <Labels labels={labels} />
 
       <Button
-        disabled
-        content="투표하기"
+        disabled={!isAdmin || isStarting}
+        content={
+          isAdmin ? (isStarting ? '시작 중...' : '시작하기') : '투표하기'
+        }
+        onClick={onStart}
       />
     </Card>
   );

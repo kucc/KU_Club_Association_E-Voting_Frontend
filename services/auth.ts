@@ -13,6 +13,12 @@ type AuthUserResponse = ApiSuccessResponse<{
 
 type LogoutResponse = ApiSuccessResponse<Record<string, never>>;
 
+const normalizeUser = (user: User): User => ({
+  ...user,
+  isAdmin: user.isAdmin ?? user.is_admin ?? false,
+  isSubstitute: user.isSubstitute ?? user.is_substitute ?? false,
+});
+
 export const signIn = async (
   username: string,
   password: string,
@@ -23,7 +29,7 @@ export const signIn = async (
       password,
     } satisfies SignInRequest);
 
-    return data.user;
+    return normalizeUser(data.user);
   } catch (error) {
     const apiError = parseApiError(error);
     throw new Error(apiError.message);
@@ -43,7 +49,7 @@ export const getCurrentUser = async (): Promise<User> => {
   try {
     const { data } = await apiClient.get<AuthUserResponse>('/api/auth/me');
 
-    return data.user;
+    return normalizeUser(data.user);
   } catch (error) {
     const apiError = parseApiError(error);
     throw new Error(apiError.message);

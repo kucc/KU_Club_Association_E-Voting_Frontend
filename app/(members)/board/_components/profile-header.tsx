@@ -10,8 +10,8 @@ type Props = Readonly<{
 
 export default function ProfileHeader({ user, onBack }: Props) {
   return (
-    <header className="relative h-[274px] w-full rounded-b-[20px] bg-profile shadow-[0_0_60px_rgba(0,0,0,0.04)]">
-      <div className="absolute top-4 flex h-11 w-full items-center gap-3 px-5">
+    <header className="relative h-[320px] w-full rounded-b-[20px] bg-profile shadow-[0_0_60px_rgba(0,0,0,0.04)]">
+      <div className="absolute top-15.5 flex h-11 w-full items-center gap-3 px-5">
         <div className="flex h-7 items-center gap-4">
           <button
             type="button"
@@ -41,7 +41,7 @@ export default function ProfileHeader({ user, onBack }: Props) {
           </Sans.T200>
         </div>
       </div>
-      <div className="absolute top-22 right-5 left-5 flex flex-col gap-4">
+      <div className="absolute top-[134px] right-5 left-5 flex flex-col gap-4">
         <div className="flex h-13 w-full items-center gap-4 px-2">
           <div className="flex flex-grow flex-col gap-2">
             <div className="flex items-center justify-between">

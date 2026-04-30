@@ -12,8 +12,10 @@ import PollCard from '@/components/common/poll-card';
 
 import type { MyPagePollRow, PollResultsById } from '../../../_types/my-page';
 import {
+  getEligibleVoterCount,
   getPollDeadline,
   getResultText,
+  getThemeByUserProfile,
   isPollStatus,
   sumVotes,
 } from '../../_utils/poll-display';
@@ -43,9 +45,12 @@ export default function MemberMyPage({
     ({ poll, myVote }) => isPollStatus(poll, 'completed') && myVote !== null,
   );
   const displayedCompletedVotes = completedVotes.slice(0, 3);
+  const eligibleVoterCount = getEligibleVoterCount();
 
   return (
-    <div className="min-h-screen w-full bg-background">
+    <div
+      className={`${getThemeByUserProfile(user)} min-h-screen w-full bg-background`}
+    >
       <ProfileHeader
         user={user}
         onBack={onBack}
@@ -74,7 +79,7 @@ export default function MemberMyPage({
                   title={poll.question}
                   deadline={getPollDeadline(poll)}
                   statistics={{
-                    quota: voteCount,
+                    quota: eligibleVoterCount,
                     votes: voteCount,
                   }}
                   myVote={myVote?.selected}
@@ -127,7 +132,7 @@ export default function MemberMyPage({
                   deadline={getPollDeadline(poll)}
                   myVote={myVote?.selected ?? '-'}
                   statistics={{
-                    quota: voteCount,
+                    quota: eligibleVoterCount,
                     votes: voteCount,
                   }}
                   results={getResultText(results)}
