@@ -22,6 +22,7 @@ import { useEffect, useMemo } from 'react';
 
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 import Button from '@/components/common/button';
 import PollCard from '@/components/common/poll-card';
@@ -38,6 +39,8 @@ export default function Home() {
 
   const { setTheme } = useTheme();
   const { mutate: _signOut } = useSignOutMutation();
+
+  const router = useRouter();
 
   const userProfile = useMemo(() => {
     return data ? toUserProfile(data) : null;
@@ -87,6 +90,12 @@ export default function Home() {
 
     setTheme(getThemeByUserProfile(userProfile));
   }, [setTheme, userProfile]);
+
+  useEffect(() => {
+    if (isSuccess) {
+      router.push('/board');
+    }
+  }, [isSuccess, router]);
 
   return (
     <div className="min-h-screen bg-background pb-20">

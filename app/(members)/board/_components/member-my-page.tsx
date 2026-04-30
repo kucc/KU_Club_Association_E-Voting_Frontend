@@ -3,10 +3,6 @@
 import { Sans } from '@/app/ui/sans';
 import type { UserProfile } from '@/types/user';
 
-import Image from 'next/image';
-import Link from 'next/link';
-
-import Button from '@/components/common/button';
 import HistoryCard from '@/components/common/history-card';
 import PollCard from '@/components/common/poll-card';
 
@@ -44,7 +40,7 @@ export default function MemberMyPage({
   const completedVotes = pollRows.filter(
     ({ poll, myVote }) => isPollStatus(poll, 'completed') && myVote !== null,
   );
-  const displayedCompletedVotes = completedVotes.slice(0, 3);
+  const displayedCompletedVotes = completedVotes;
   const eligibleVoterCount = getEligibleVoterCount();
 
   return (
@@ -106,7 +102,8 @@ export default function MemberMyPage({
                 완료된 투표
               </span>
             </Sans.T240>
-            <Link href="/completed-votes">
+            <div></div>
+            {/* <Link href="/completed-votes">
               <Image
                 src="/icons/arrow.svg"
                 alt="more"
@@ -118,7 +115,7 @@ export default function MemberMyPage({
                     : 'cursor-pointer'
                 }
               />
-            </Link>
+            </Link> */}
           </div>
           {displayedCompletedVotes.length > 0 ? (
             displayedCompletedVotes.map(({ poll, myVote }) => {
@@ -150,7 +147,7 @@ export default function MemberMyPage({
               완료된 내 투표가 없습니다.
             </Sans.T160>
           )}
-          {completedVotes.length >= 3 && (
+          {/* {completedVotes.length >= 3 && (
             <Link
               href="/completed-votes"
               className="w-full"
@@ -162,7 +159,7 @@ export default function MemberMyPage({
                 />
               </div>
             </Link>
-          )}
+          )} */}
         </section>
       </main>
     </div>
