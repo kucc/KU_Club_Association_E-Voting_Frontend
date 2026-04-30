@@ -93,7 +93,7 @@ export default function Home() {
       >
         {isSuccess ? (
           <div className="flex h-11 w-full items-center justify-between px-5">
-            <Image
+            {/* <Image
               src="/icons/logo_poll.svg"
               alt="logo"
               width={28}
@@ -104,7 +104,19 @@ export default function Home() {
                   : 'cursor-pointer brightness-0 invert'
               }
               onClick={() => signOut()}
-            />
+            /> */}
+            <div
+              className="cursor-pointer"
+              onClick={() => signOut()}
+            >
+              <Sans.T160
+                as="p"
+                weight="medium"
+                color="hero"
+              >
+                로그아웃
+              </Sans.T160>
+            </div>
             <Link href="/board">
               <Image
                 src="/icons/profile.svg"
