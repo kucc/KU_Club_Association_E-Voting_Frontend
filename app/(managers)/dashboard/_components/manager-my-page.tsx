@@ -155,6 +155,13 @@ export default function ManagerMyPage({
               </div>
             </Link>
           )}
+
+          <Link
+            href="/dashboard/poll/create"
+            className="mt-4 block w-full"
+          >
+            <Button content="투표 만들기" />
+          </Link>
         </section>
       </main>
     </div>
