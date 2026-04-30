@@ -23,6 +23,7 @@ import { useEffect, useMemo } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 
+import Button from '@/components/common/button';
 import PollCard from '@/components/common/poll-card';
 import ScheduledCard from '@/components/common/scheduled-card';
 
@@ -184,6 +185,15 @@ export default function Home() {
             >
               KUVOTE © KUCC
             </Sans.T200>
+          )}
+
+          {isManagementAdmin && (
+            <Link
+              href="/dashboard/poll/create"
+              className="mt-4 block w-full"
+            >
+              <Button content="투표 만들기" />
+            </Link>
           )}
         </div>
 
