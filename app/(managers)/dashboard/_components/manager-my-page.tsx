@@ -93,6 +93,34 @@ export default function ManagerMyPage({
             </Sans.T160>
           )}
         </section>
+
+        {scheduledVotes.length > 0 && (
+          <section className="flex flex-col gap-4">
+            <Sans.T240
+              as="h2"
+              color="heading-page"
+              weight="bold"
+            >
+              예정된 투표
+            </Sans.T240>
+            <div className="flex flex-col gap-4">
+              {scheduledVotes.map((vote) => (
+                <ScheduledCard
+                  key={vote.poll.id}
+                  title={vote.poll.question}
+                  openingTime={vote.poll.ended_at || ''}
+                  isAdmin={user.role === 'EXECUTIVE'}
+                  isStarting={
+                    startPollMutation.isPending &&
+                    startPollMutation.variables === vote.poll.id
+                  }
+                  onStart={() => startPollMutation.mutate(vote.poll.id)}
+                />
+              ))}
+            </div>
+          </section>
+        )}
+
         <section className="flex flex-col gap-4 pb-10">
           <div className="flex h-10 items-center justify-between">
             <Sans.T240
@@ -157,7 +185,8 @@ export default function ManagerMyPage({
               </div>
             </Link>
           )} */}
-          {scheduledVotes.length > 0 && (
+
+          {/* {scheduledVotes.length > 0 && (
             <section className="flex flex-col gap-4">
               <Sans.T240
                 as="h2"
@@ -182,7 +211,7 @@ export default function ManagerMyPage({
                 ))}
               </div>
             </section>
-          )}
+          )} */}
         </section>
       </main>
     </div>
