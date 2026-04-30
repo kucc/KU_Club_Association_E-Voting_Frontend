@@ -155,6 +155,16 @@ export default function ManagerMyPage({
               </div>
             </Link>
           )}
+          {user.role === 'REPRESENTATIVE' && (
+            <Link
+              href="/dashboard/poll/create"
+              className="mt-4 w-full"
+            >
+              <div className="flex flex-col">
+                <Button content="투표 만들기" />
+              </div>
+            </Link>
+          )}
         </section>
       </main>
     </div>
