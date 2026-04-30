@@ -36,6 +36,8 @@ export default function AdminPollCreatePage() {
       await createPoll({
         question, // 제목
 
+        description, // 설명
+
         options: ['찬성', '반대'], // 우선 기본값 (나중에 UI 추가 가능)
 
         sort_order: 1, // 정렬 순서
