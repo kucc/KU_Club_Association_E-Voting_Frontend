@@ -12,7 +12,6 @@ import {
 } from '@/hooks/queries/useAuthQuery';
 import {
   pollQueryKeys,
-  usePollsQuery,
   useStartPollMutation,
 } from '@/hooks/queries/usePollQuery';
 import { useTheme } from '@/providers/theme-provider';
@@ -27,9 +26,13 @@ import Link from 'next/link';
 import PollCard from '@/components/common/poll-card';
 import ScheduledCard from '@/components/common/scheduled-card';
 
+import { useMyPageData } from './_hooks/use-my-page-data';
+
 export default function Home() {
   const { data, isSuccess } = useCurrentUserQuery();
-  const polls = usePollsQuery();
+  // const polls = usePollsQuery();
+  const { pollRows } = useMyPageData();
+  const polls = pollRows;
   const startPollMutation = useStartPollMutation();
 
   const { setTheme } = useTheme();
@@ -46,18 +49,18 @@ export default function Home() {
       data.username,
     );
 
-  const ongoingVotes = (polls.data || []).filter(
-    (v) => v.status === 'continuing',
+  const ongoingVotes = (polls || []).filter(
+    (v) => v.poll.status === 'continuing',
   );
-  const scheduledVotes = (polls.data || []).filter(
-    (v) => v.status === 'pending',
+  const scheduledVotes = (polls || []).filter(
+    (v) => v.poll.status === 'pending',
   );
   const eligibleVoterCount = getEligibleVoterCount();
 
   const ongoingPollResultQueries = useQueries({
     queries: ongoingVotes.map((vote) => ({
-      queryKey: pollQueryKeys.detail(vote.id),
-      queryFn: () => getPollResults(vote.id),
+      queryKey: pollQueryKeys.detail(vote.poll.id),
+      queryFn: () => getPollResults(vote.poll.id),
       enabled: isSuccess,
       staleTime: 1000 * 60 * 3,
       gcTime: 1000 * 60 * 10,
@@ -65,7 +68,7 @@ export default function Home() {
   });
   const resultsByPollId = new Map(
     ongoingVotes.map((vote, index) => [
-      vote.id,
+      vote.poll.id,
       ongoingPollResultQueries[index]?.data?.results,
     ]),
   );
@@ -117,7 +120,8 @@ export default function Home() {
                 로그아웃
               </Sans.T160>
             </div>
-            <Link href="/board">
+            <div></div>
+            {/* <Link href="/board">
               <Image
                 src="/icons/profile.svg"
                 alt="profile"
@@ -125,7 +129,7 @@ export default function Home() {
                 height={28}
                 className={usesExecutiveTheme ? '' : 'brightness-0 invert'}
               />
-            </Link>
+            </Link> */}
           </div>
         ) : (
           <div className="flex w-full justify-center">
@@ -232,20 +236,20 @@ export default function Home() {
               {ongoingVotes.map((vote) => {
                 const voteCount =
                   resultsByPollId
-                    .get(vote.id)
+                    .get(vote.poll.id)
                     ?.reduce((total, result) => total + result.count, 0) ?? 0;
 
                 return (
                   <PollCard
-                    key={vote.id}
-                    id={vote.id}
-                    title={vote.question}
-                    deadline={vote.ended_at || ''}
+                    key={vote.poll.id}
+                    id={vote.poll.id}
+                    title={vote.poll.question}
+                    deadline={vote.poll.ended_at || ''}
                     statistics={{
                       quota: eligibleVoterCount,
                       votes: voteCount,
                     }}
-                    // myVote={vote.myVote}
+                    myVote={vote.myVote?.selected}
                     isAdmin={isManagementAdmin}
                   />
                 );
@@ -265,15 +269,15 @@ export default function Home() {
               <div className="flex flex-col gap-4">
                 {scheduledVotes.map((vote) => (
                   <ScheduledCard
-                    key={vote.id}
-                    title={vote.question}
-                    openingTime={vote.ended_at || ''}
+                    key={vote.poll.id}
+                    title={vote.poll.question}
+                    openingTime={vote.poll.ended_at || ''}
                     isAdmin={canStartPoll}
                     isStarting={
                       startPollMutation.isPending &&
-                      startPollMutation.variables === vote.id
+                      startPollMutation.variables === vote.poll.id
                     }
-                    onStart={() => startPollMutation.mutate(vote.id)}
+                    onStart={() => startPollMutation.mutate(vote.poll.id)}
                   />
                 ))}
               </div>
